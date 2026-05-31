@@ -1,2 +1,1 @@
-# SaturEQ
-A multiband saturator/EQ built with JUCE.
+A saturator/EQ plugin in development.
