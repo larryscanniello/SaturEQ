@@ -9,7 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Filter.h"
-#include "LinkwitzRiley.h"
+#include "LinkwitzRileyManager.h"
+#include "Saturator.h"
 #include <cmath>
 
 //==============================================================================
@@ -26,7 +27,7 @@ SaturEQAudioProcessor::SaturEQAudioProcessor()
         params(apvts)
 #endif
 {
-    
+    lrManager = std::make_unique<LinkwitzRileyManager>();
 }
 
 SaturEQAudioProcessor::~SaturEQAudioProcessor()
@@ -103,11 +104,9 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     params.prepareToPlay(sampleRate);
     params.reset();
     
-    int upsampleMultiplier = std::ceil(HIGH_SR_THRESHOLD / sampleRate);
+    oversampler.initProcessing(samplesPerBlock);
     
-    highSRBuffer.setSize(getTotalNumInputChannels(),samplesPerBlock * upsampleMultiplier);
-    
-    
+    upsampled.clear();
 }
 
 void SaturEQAudioProcessor::releaseResources()
@@ -150,40 +149,28 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     params.update();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
+    upsampled = oversampler.processSamplesUp(buffer);
     
-    resampler.resample(buffer,highSRBuffer);
+    bandblocks = lrManager->splitSignal(upsampled);
     
-    lrManager.splitSignal(highSRBuffer,bandsHighSR);
-
-    for(int channel=0; channel< totalNumInputChannels; channel++){
-        auto* channelData = buffer.getWritePointer(channel);
-        
-        highSRBuffer[channel].clear();
-        
-        for(int band=0;band<BANDS;band++){
-                        
-            saturator.processBlock(bandsHighSR[channel][band]);
-            
-            filters[band].processBlock(bandsHighSR[channel][band]);
-            
-            for(int sample=0; sample<highSRBuffer[channel].size();sample++){
-                highSRBuffer[channel][sample] += bandsHighSR[channel][band][sample];
-            }
-        }
+    for(auto bandblock : bandblocks)
+    {
+        saturator.processBlock(bandblock);
     }
     
-    for(int channel=0; channel<totalNumInputChannels; channel++){
-        resampler.resample(highSRBuffer,buffer.getWritePointer(channel));
+    juce::dsp::AudioBlock<float> summed = lrManager -> sumSignal(upsampled);
+    
+    for(auto &filter : filters)
+    {
+        filter.processBlock(summed);
     }
+    
+    juce::dsp::AudioBlock<float> bufferblock = juce::dsp::AudioBlock<float>(buffer);
+    
+    oversampler.processSamplesDown(bufferblock);
     
 }
 

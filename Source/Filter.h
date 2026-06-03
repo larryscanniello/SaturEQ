@@ -48,5 +48,6 @@ public:
     
     void putSample(float sample,int channel);
     float getSample(int channel) {return y[channel][curr];};
-    void processBlock(juce::AudioBuffer<float> &input, juce:: AudioBuffer<float> &output);
+    void processBlock(juce::dsp::AudioBlock<float> &input, juce::dsp::AudioBlock<float> &output);
+    void processBlock(juce::dsp::AudioBlock<float> &buf);
 };

@@ -31,10 +31,4 @@ public:
     
     void updateCoefficients(float centerFreq, float Q, float dB);
     
-    
-    
-    void putSample(float sample,int channel);
-    
-    void processBlock(juce::AudioBuffer<float> &input, juce:: AudioBuffer<float> &output);
-    
 };

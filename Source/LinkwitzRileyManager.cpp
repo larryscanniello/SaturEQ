@@ -13,12 +13,14 @@
 #include "Filter.h"
 #include <vector>
 
+const int NUM_STAGES = 2;
+
 void LinkwitzRileyManager::setSampleRate(int sr)
 {
     int oldsr = sampleRate;
     float ratio = float(sr)/float(oldsr);
     for(int band=0;band<filters.size();band++){
-        for(int stage=0; stage < 2; stage++){
+        for(int stage=0; stage < NUM_STAGES; stage++){
             filters[band][stage].setSampleRate(sr);
         }
     }
@@ -46,24 +48,49 @@ void LinkwitzRileyManager::deriveFiltersFromFrequencies()
     }
 }
 
-void LinkwitzRileyManager::splitSignal(
-                                              juce::AudioBuffer<float> &buf,
-                                              std::vector<juce::AudioBuffer<float>> &output
-                                       )
+void LinkwitzRileyManager::prepare(size_t channelSize,size_t numBands,size_t samplesPerBlock)
 {
-    jassert(filters.size()>=0);
-    if(filters.size()<=0) return;
+    bands.resize(numBands,channelSize,samplesPerBlock);
+}
+
+juce::dsp::AudioBlock<float>& LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlock<float> &output)
+{
+    jassert(output.getNumSamples()==bands.ptrs[0]->buffer.getNumSamples());
+    jassert(output.getNumChannels()==bands.ptrs[0]->buffer.getNumChannels());
     
-    filters[0][0].processBlock(buf, output[0]);
+    output.clear();
     
-    long n = filters.size();
-    
-    for(int i=0; i<n-1;i++){
-        filters[i][1].processBlock(buf, output[i+1]);
-        filters[i+1][0].processBlock(output[i+1], output[i+1]);
+    for(auto band=1; band<bands.blocks.size(); band++)
+    {
+        bands.blocks[0].add(bands.blocks[band]);
     }
     
-    filters[n-1][1].processBlock(buf, output[n-1]);
+    return bands.blocks[0];
+}
+
+
+std::vector<juce::dsp::AudioBlock<float>>& LinkwitzRileyManager::splitSignal(juce::dsp::AudioBlock<float> &input)
+{
+    jassert(filters.size()>=0);
     
+    if(filters.size()<=0)
+    {
+        juce::dsp::AudioBlock<float> internalBand(bands.ptrs[0]->buffer);
+        internalBand.copyFrom(input);
+        return bands.blocks;
+    };
+    
+    filters[0][0].processBlock(input, bands.ptrs[0]->block);
+    
+    auto n = filters.size();
+    
+    for(int i=0; i<n-1;i++){
+        filters[i][1].processBlock(input, bands.ptrs[i+1]->block);
+        filters[i+1][0].processBlock(bands.ptrs[i+1]->block, bands.ptrs[i+1]->block);
+    }
+    
+    filters[n-1][1].processBlock(input, bands.ptrs[n-1]->block);
+    
+    return bands.blocks;
 }
 

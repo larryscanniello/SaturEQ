@@ -11,6 +11,9 @@
       <GROUP id="{2E338707-AB2A-C0BC-5481-53024A720707}" name="DSP">
         <FILE id="JLKr1A" name="Filter.cpp" compile="1" resource="0" file="Source/Filter.cpp"/>
         <FILE id="YMwjqk" name="Filter.h" compile="0" resource="0" file="Source/Filter.h"/>
+        <FILE id="EXOYl0" name="Notch.h" compile="0" resource="0" file="Source/Notch.h"/>
+        <FILE id="JxybND" name="Saturator.cpp" compile="1" resource="0" file="Source/Saturator.cpp"/>
+        <FILE id="tzIUWN" name="Saturator.h" compile="0" resource="0" file="Source/Saturator.h"/>
         <FILE id="cKmNtP" name="SecondOrderButterworth.cpp" compile="1" resource="0"
               file="Source/SecondOrderButterworth.cpp"/>
         <FILE id="XgDiBZ" name="SecondOrderButterworth.h" compile="0" resource="0"

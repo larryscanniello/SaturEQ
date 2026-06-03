@@ -11,7 +11,8 @@
 #include <JuceHeader.h>
 #include "Parameters.h"
 #include "Filter.h"
-#include "LinkwitzRiley.h"
+#include "LinkwitzRileyManager.h"
+#include "Saturator.h"
 #include <vector>
 
 //==============================================================================
@@ -69,16 +70,21 @@ public:
     
     Parameters params;
     
-    int resampleFrequency = 196000;
+    int resampleFrequency = 196000.0f;
     
-    juce::AudioBuffer<float> highSRBuffer;
-    std::vector<juce::AudioBuffer<float>> bandsHighSR;
+    std::unique_ptr<LinkwitzRileyManager> lrManager;
     
-    LinkwitzRileyManager lrManager;
-    
-    juce::dsp::Oversampling<float> oversampling{ getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
+    juce::dsp::Oversampling<float> oversampler{ (size_t) getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
 
-
+    Saturator saturator;
+    
+    juce::dsp::AudioBlock<float> upsampled;
+    
+    std::vector<Filter> filters;
+    
+    std::vector<juce::dsp::AudioBlock<float>> bandblocks;
+    
+    
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SaturEQAudioProcessor)

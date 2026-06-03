@@ -9,6 +9,7 @@
 */
 
 #include "Filter.h"
+#include <juce_dsp/juce_dsp.h>
 
 void Filter::putSample(float sample,int channel){
     std::vector<float>& xChannel = x[channel];
@@ -28,16 +29,30 @@ void Filter::putSample(float sample,int channel){
 }
 
 
-void Filter::processBlock(juce::AudioBuffer<float> &input, juce:: AudioBuffer<float> &output)
+void Filter::processBlock(juce::dsp::AudioBlock<float> &input, juce::dsp::AudioBlock<float> &output)
 {
     for(int channel = 0; channel<input.getNumChannels();channel++){
-        auto channelData = input.getReadPointer(channel);
-        auto writePtr = output.getWritePointer(channel);
+        auto channelData = input.getChannelPointer(channel);
+        auto writePtr = output.getChannelPointer(channel);
         
         for(int sample=0; sample<input.getNumSamples();sample++){
             putSample(channelData[sample],channel);
             writePtr[sample] = getSample(channel);
         }
+    }
+}
+
+void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)
+{
+    for(auto channel=0; channel<buf.getNumChannels();channel++)
+    {
+        auto channelData = buf.getChannelPointer(channel);
+        for(auto sample=0; sample<buf.getNumSamples();sample++)
+        {
+            putSample(channelData[sample], channel);
+            channelData[sample] = getSample(channel);
+        }
+        
     }
 }
 
