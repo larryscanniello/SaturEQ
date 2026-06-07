@@ -49,6 +49,13 @@ void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)
         auto channelData = buf.getChannelPointer(channel);
         for(auto sample=0; sample<buf.getNumSamples();sample++)
         {
+            float fc = params.fcSmoother->getNextValue();
+            float Q = params.QSmoother->getNextValue();
+            float gainInDB = params.gainInDBSmoother->getNextValue();
+            if(params.fcSmoother->isSmoothing() || params.QSmoother->isSmoothing() || params.gainInDBSmoother->isSmoothing())
+            {
+                strategy.updateCoefficients(params,a,b,sampleRate);
+            }
             putSample(channelData[sample], channel);
             channelData[sample] = getSample(channel);
         }

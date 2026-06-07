@@ -10,32 +10,33 @@
 
 #pragma once
 #include "Parameters.h"
+#include "ParamDeclarations.h"
 #include "Filter.h"
-
+#include "HighPass.h"
+#include "LowPass.h"
+#include "Peaking.h"
 
 class EQManager {
     
 public:
-    EQManager(size_t sr, size_t numBands)
+    EQManager(size_t sr, size_t numBands, size_t numChannels, Parameters::EQParams eqparams)
+    : sampleRate(sr), numChannels(numChannels), eqParams(eqparams)
     {
-        sampleRate = sr;
-        changeNumBands(numBands);
-    }
+        initializeFilterCoefficients(sr, numBands, numChannels, eqparams);
+    };
     
     void processBlock(juce::dsp::AudioBlock<float>& buffer);
     
-    
+    void initializeFilterCoefficients(size_t sr, size_t numBands, size_t numChannels, Parameters::EQParams eqparams);
     
 private:
     
     void changeNumBands(size_t numBands);
     
     size_t sampleRate;
+    size_t numChannels;
     
-    std::vector<float> eqFreqs;
-    std::vector<float> eqGainsInDB;
-    std::vector<float> eqQs;
-    std::vector<bool> eqBypasses;
+    Parameters::EQParams eqParams;
 
     std::vector<Filter> filters;
     

@@ -13,16 +13,12 @@
 
 const float PI = juce::MathConstants<float>::pi;
 
-class LowPass : public Filter
+class LowPass : public Filter::CoefficientStrategy
 {
     
 public:
     
-    LowPass(size_t numChannels, float centerFreq,float Q, float dB, size_t sampleRate)
-    : Filter(numChannels, centerFreq, Q, dB, sampleRate){};
-    
-    void updateCoefficients(float fc, float Q, [[maybe_unused]] float dB,size_t sampleRate)
-    {
+    void updateCoefficients(size_t sampleRate, float fc, float Q,[[maybe_unused]] float gainInDB,std::vector<float> &a, std::vector<float> &b)
         
         float omega_0 = 2.0f * PI * fc / sampleRate;
         float alpha = std::sin(omega_0) / (2.0f * Q);

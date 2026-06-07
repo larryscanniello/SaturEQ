@@ -80,8 +80,6 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     
     juce::dsp::AudioBlock<float> upsampled;
     
-    std::vector<std::unique_ptr<Filter>> filters;
-    
     std::vector<juce::dsp::AudioBlock<float>> bandblocks;
     
     
