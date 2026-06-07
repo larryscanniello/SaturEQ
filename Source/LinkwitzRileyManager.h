@@ -9,16 +9,19 @@
 */
 
 #pragma once
-#include "SecondOrderButterworth.h"
+#include "LowPass.h"
+#include "HighPass.h"
+#include "Paramaters.h"
 #include <vector>
 #include <juce_dsp/juce_dsp.h>
 
 class LinkwitzRileyManager {
     
 public:
-    LinkwitzRileyManager()
+    LinkwitzRileyManager(Parameters params)
     {
         bands.resize(0,0,0);
+        this.params = params;
     }
     
     void addSplit(float freq);
@@ -38,11 +41,14 @@ public:
     void prepare(size_t channelSize, size_t numBands, size_t samplesPerBlock);
     
 private:
+    
+    Params params;
+    
     int sampleRate;
     
     int numChannels;
     
-    std::vector<std::vector<SecondOrderButterworth>> filters;
+    std::vector<std::pair<LowPass,HighPass>> filters;
     
     template<typename type>
     struct Band{

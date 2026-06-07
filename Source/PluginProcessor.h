@@ -24,40 +24,40 @@ const int HIGH_SR_THRESHOLD = 176400;
 
 class SaturEQAudioProcessor  : public juce::AudioProcessor
 {
-public:
+    public:
     //==============================================================================
     SaturEQAudioProcessor();
     ~SaturEQAudioProcessor() override;
-
+    
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-
-   #ifndef JucePlugin_PreferredChannelConfigurations
+    
+#ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
-
+#endif
+    
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-
+    
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
-
+    
     //==============================================================================
     const juce::String getName() const override;
-
+    
     bool acceptsMidi() const override;
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
-
+    
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
-
+    
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
@@ -75,12 +75,12 @@ public:
     std::unique_ptr<LinkwitzRileyManager> lrManager;
     
     juce::dsp::Oversampling<float> oversampler{ (size_t) getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
-
+    
     Saturator saturator;
     
     juce::dsp::AudioBlock<float> upsampled;
     
-    std::vector<Filter> filters;
+    std::vector<std::unique_ptr<Filter>> filters;
     
     std::vector<juce::dsp::AudioBlock<float>> bandblocks;
     

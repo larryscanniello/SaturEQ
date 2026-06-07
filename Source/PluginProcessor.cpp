@@ -11,6 +11,9 @@
 #include "Filter.h"
 #include "LinkwitzRileyManager.h"
 #include "Saturator.h"
+#include "ParamDeclarations.h"
+#include "Peaking.h"
+#include "Parameters.h"
 #include <cmath>
 
 //==============================================================================
@@ -28,6 +31,14 @@ SaturEQAudioProcessor::SaturEQAudioProcessor()
 #endif
 {
     lrManager = std::make_unique<LinkwitzRileyManager>();
+    filters.resize(Params::EQ_BAND_NUM);
+    
+    filters[0] = std::make_unique<HighPass>();
+    filters[1] = std::make_unique<Peaking>();
+    filters[2] = std::make_unique<Peaking>();
+    filters[3] = std::make_unique<Peaking>();
+    filters[4] = std::make_unique<Peaking>();
+    filters[5] = std::make_unique<LowPass>();
 }
 
 SaturEQAudioProcessor::~SaturEQAudioProcessor()
@@ -156,10 +167,7 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     bandblocks = lrManager->splitSignal(upsampled);
     
-    for(auto bandblock : bandblocks)
-    {
-        saturator.processBlock(bandblock);
-    }
+    saturator.processBands(bandblocks);
     
     juce::dsp::AudioBlock<float> summed = lrManager -> sumSignal(upsampled);
     

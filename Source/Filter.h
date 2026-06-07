@@ -23,28 +23,22 @@ protected:
     
     std::vector<float> a;
     std::vector<float> b;
-    
-    float sampleRate;
-    
+
     
 public:
-    Filter(float sr, int inputs) : sampleRate(sr){
-        x.resize(inputs);
-        y.resize(inputs);
-        resetDelayLines();
-    };
     
-    Filter(float sr, int inputs, float centerFreq,float Q, float dB){
-        x.resize(inputs);
-        y.resize(inputs);
+    Filter(size_t numChannels, float centerFreq,float Q, float dB, size_t sampleRate){
+        x.resize(numChannels);
+        y.resize(numChannels);
         resetDelayLines();
-        updateCoefficients(centerFreq, Q, dB);
+        updateCoefficients(centerFreq, Q, dB, sampleRate);
     }
     
-    void setSampleRate(int sr) { sampleRate = sr; };
+    
+    
     
     void resetDelayLines();
-    virtual void updateCoefficients(float centerFreq, float Q, float dB);
+    virtual void updateCoefficients(float centerFreq, float Q, float dB,size_t sampleRate);
     
     void putSample(float sample,int channel);
     float getSample(int channel) {return y[channel][curr];};

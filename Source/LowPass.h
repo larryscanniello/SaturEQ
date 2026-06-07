@@ -1,0 +1,37 @@
+/*
+  ==============================================================================
+
+    LinkwitzRiley.h
+    Created: 27 May 2026 12:18:30am
+    Author:  Larry Scanniello
+
+  ==============================================================================
+*/
+
+#pragma once
+#include <JuceHeader.h>
+
+const float PI = juce::MathConstants<float>::pi;
+
+class LowPass : public Filter
+{
+    
+public:
+    
+    LowPass(size_t numChannels, float centerFreq,float Q, float dB, size_t sampleRate)
+    : Filter(numChannels, centerFreq, Q, dB, sampleRate){};
+    
+    void updateCoefficients(float fc, float Q, [[maybe_unused]] float dB,size_t sampleRate)
+    {
+        
+        float omega_0 = 2.0f * PI * fc / sampleRate;
+        float alpha = std::sin(omega_0) / (2.0f * Q);
+        b[0] = (1 - std::cos(omega_0)) * 0.5f;
+        b[1] = 1 - std::cos(omega_0);
+        b[2] = (1 - std::cos(omega_0)) * 0.5f;
+        a[0] = 1 + alpha;
+        a[1] = -2 * std::cos(omega_0);
+        a[2] = 1 - alpha;
+    }
+    
+};
