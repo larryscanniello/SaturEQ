@@ -16,56 +16,69 @@ static void castParameter(juce::AudioProcessorValueTreeState& apvts,
     jassert(destination);
 }
 
-Parameters::Parameters(juce::AudioProcessorValueTreeState& apvts)
+Parameters::EQ::EQ(juce::AudioProcessorValueTreeState &apvts)
 {
+    castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[0].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[1].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[2].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[3].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[4].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[5].fc);
+
+    castParameter(apvts,ParamDeclarations::EQQ0::Name,params[0].Q);
+    castParameter(apvts,ParamDeclarations::EQQ1::Name,params[1].Q);
+    castParameter(apvts,ParamDeclarations::EQQ2::Name,params[2].Q);
+    castParameter(apvts,ParamDeclarations::EQQ3::Name,params[3].Q);
+    castParameter(apvts,ParamDeclarations::EQQ4::Name,params[4].Q);
+    castParameter(apvts,ParamDeclarations::EQQ5::Name,params[5].Q);
     
-    castParameter(apvts,ParamDeclarations::EQFreq0::Name,eqFreqParams[0]);
-    castParameter(apvts,ParamDeclarations::EQFreq1::Name,eqFreqParams[1]);
-    castParameter(apvts,ParamDeclarations::EQFreq2::Name,eqFreqParams[2]);
-    castParameter(apvts,ParamDeclarations::EQFreq3::Name,eqFreqParams[3]);
-    castParameter(apvts,ParamDeclarations::EQFreq4::Name,eqFreqParams[4]);
-    castParameter(apvts,ParamDeclarations::EQFreq5::Name,eqFreqParams[5]);
-    
-    castParameter(apvts,ParamDeclarations::EQQ0::Name,eqQParams[0]);
-    castParameter(apvts,ParamDeclarations::EQQ1::Name,eqQParams[1]);
-    castParameter(apvts,ParamDeclarations::EQQ2::Name,eqQParams[2]);
-    castParameter(apvts,ParamDeclarations::EQQ3::Name,eqQParams[3]);
-    castParameter(apvts,ParamDeclarations::EQQ4::Name,eqQParams[4]);
-    castParameter(apvts,ParamDeclarations::EQQ5::Name,eqQParams[5]);
-    
-    for(size_t i=0; i<ParamDeclarations::EQ_BAND_NUM; i++)
+    for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        castParameter(apvts,ParamDeclarations::EQGain::Name,eqGainInDBParams[i]);
-        castParameter(apvts,ParamDeclarations::EQBypass::Name,eqBypassParams[i]);
+        castParameter(apvts,ParamDeclarations::EQGain::Name,params[i].gainInDB);
+        castParameter(apvts,ParamDeclarations::EQBypass::Name,params[i].gainInDB);
     }
-    
-    for(size_t i=0; i<ParamDeclarations::SATURATION_BAND_NUM; i++)
+}
+
+Parameters::Saturation::Saturation(juce::AudioProcessorValueTreeState &apvts)
+{
+    params.resize(NUM_SATURATION_BANDS);
+    for(auto i=0; i<NUM_SATURATION_BANDS; i++)
     {
-        castParameter(apvts,ParamDeclarations::SaturationPreGain::Name,saturationPreGainParams[i]);
-        castParameter(apvts,ParamDeclarations::SaturationBypass::Name,saturationBypassParams[i]);
+        castParameter(apvts, ParamDeclarations::SaturationPreGain::Name, params[i].preGain);
+        castParameter(apvts, ParamDeclarations::SaturationBypass::Name, params[i].bypass);
     }
-    setDefaults();
+}
+
+Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apvts), saturationParams(apvts)
+{
 }
     
 
 void Parameters::prepareToPlay(double sampleRate) noexcept
 {
     double duration = 0.02f;
-    for(auto i=0; i<ParamDeclarations::EQ_BAND_NUM; i++)
+    for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        eqFreqSmoothers[i].reset(sampleRate,duration);
-        eqQSmoothers[i].reset(sampleRate,duration);
-        eqFreqSmoothers[i].reset(sampleRate,duration);
-        eqQSmoothers[i].reset(sampleRate,duration);
+        EQ::Band band = eqParams.getParamsForBand(i);
+        band.fcSmoother->reset(sampleRate,duration);
+        band.QSmoother->reset(sampleRate, duration);
+        band.gainInDBSmoother->reset(sampleRate, duration);
     }
-    for(auto i=0; i<ParamDeclarations::SATURATION_BAND_NUM; i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
     {
-        saturationPreGainSmoothers[i].reset(sampleRate,duration);
+        Saturation::Band band = saturationParams.getParamsForBand(i);
+        band.preGainSmoother.reset(sampleRate,duration);
     }
 }
 
+/*
 void Parameters::reset() noexcept
 {
+    for(auto i=0; i<NUM_EQ_BANDS; i++)
+    {
+        EQ::Band band = eqParams->getParamsForBand(i);
+        band.fc
+    }
     eqFreqs = ParamDeclarations::EQ_DEFAULT_FREQS;
     eqQs = ParamDeclarations::EQ_DEFAULT_QS;
     eqGainsInDB = {0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
@@ -104,6 +117,7 @@ void Parameters::update() noexcept
         saturationBypasses[i] = saturationBypassParams[i]->get();
     }
  }
+ 
 
 void Parameters::smoothen() noexcept
 {
@@ -119,6 +133,7 @@ void Parameters::smoothen() noexcept
         saturationPreGains[i] = saturationPreGainSmoothers[i].getNextValue();
     }
 }
-
+*/
 
 #include "Parameters.h"
+

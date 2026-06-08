@@ -115,6 +115,10 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     params.prepareToPlay(sampleRate);
     params.reset();
     
+    specs.sampleRate = sampleRate;
+    specs.maximumBlockSize = samplesPerBlock;
+    specs.numChannels = static_cast<size_t>(getTotalNumInputChannels());
+    
     oversampler.initProcessing(samplesPerBlock);
     
     upsampled.clear();

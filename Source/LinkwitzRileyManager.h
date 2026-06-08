@@ -11,17 +11,16 @@
 #pragma once
 #include "LowPass.h"
 #include "HighPass.h"
-#include "Paramaters.h"
+#include "Parameters.h"
 #include <vector>
 #include <juce_dsp/juce_dsp.h>
 
 class LinkwitzRileyManager {
     
 public:
-    LinkwitzRileyManager(Parameters params)
+    LinkwitzRileyManager(Parameters::Saturation params, juce::dsp::ProcessSpec spec)
     {
-        bands.resize(0,0,0);
-        this.params = params;
+        
     }
     
     void addSplit(float freq);
@@ -42,7 +41,7 @@ public:
     
 private:
     
-    Params params;
+    Parameters::Saturation params;
     
     int sampleRate;
     
@@ -72,12 +71,13 @@ private:
         juce::dsp::AudioBlock<type> block;
     };
     
+    template<typename type>
     struct Bands{
-        std::vector<juce::dsp::AudioBlock<float>> blocks; //need this pre-allocated to return without allocating memory
-        std::vector<std::unique_ptr<Band<float>>> ptrs;
+        std::vector<juce::dsp::AudioBlock<type>> blocks; //need this pre-allocated to return without allocating memory
+        std::vector<std::unique_ptr<Band<type>>> ptrs;
         void resize(size_t numBands,size_t numChannels, size_t samplesPerBlock)
         {
-            ptrs.resize(numBands,std::make_unique<Band<float>>(numChannels,samplesPerBlock));
+            ptrs.resize(numBands,std::make_unique<Band<type>>(numChannels,samplesPerBlock));
             blocks.resize(numBands);
             for(auto i=0; i<numBands;i++)
             {

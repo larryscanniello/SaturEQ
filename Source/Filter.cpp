@@ -54,7 +54,7 @@ void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)
             float gainInDB = params.gainInDBSmoother->getNextValue();
             if(params.fcSmoother->isSmoothing() || params.QSmoother->isSmoothing() || params.gainInDBSmoother->isSmoothing())
             {
-                strategy.updateCoefficients(params,a,b,sampleRate);
+                strategy.updateCoefficients(sampleRate,fc,Q,gainInDB,a,b);
             }
             putSample(channelData[sample], channel);
             channelData[sample] = getSample(channel);

@@ -41,9 +41,7 @@ protected:
     CoefficientStrategy strategy;
     
 public:
-    
-    
-    
+
     Filter(size_t numChannels,
            size_t sampleRate,
            Parameters::EQParams::FilterParams p,

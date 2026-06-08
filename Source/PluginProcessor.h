@@ -66,13 +66,15 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
         *this, nullptr, "Parameters", Parameters::createParameterLayout()
     };
     
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    
     Parameters params;
     
-    int resampleFrequency = 196000.0f;
+    size_t resampleFrequency = 196000.0f;
     
-    std::unique_ptr<LinkwitzRileyManager> lrManager;
+    juce::dsp::ProcessSpec specs;
+    
+    std::unique_ptr<LinkwitzRileyManager> lrManager = std::make_unique<LinkwitzRileyManager();
+    
+    std::unique_ptr<EQManager> eqManager = std::make_unique
     
     juce::dsp::Oversampling<float> oversampler{ (size_t) getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
     
