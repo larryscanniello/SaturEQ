@@ -41,17 +41,15 @@ Parameters::EQ::EQ(juce::AudioProcessorValueTreeState &apvts)
 
 Parameters::Saturation::Saturation(juce::AudioProcessorValueTreeState &apvts)
 {
-    params.resize(NUM_SATURATION_BANDS);
-    for(auto i=0; i<NUM_SATURATION_BANDS; i++)
+    params.resize(ParamDeclarations::SATURATION_NUM_BANDS);
+    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
     {
         castParameter(apvts, ParamDeclarations::SaturationPreGain::Name, params[i].preGain);
         castParameter(apvts, ParamDeclarations::SaturationBypass::Name, params[i].bypass);
     }
 }
 
-Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apvts), saturationParams(apvts)
-{
-}
+Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts, juce::dsp::ProcessSpec &spec) : eqParams(apvts), saturationParams(apvts){}
     
 
 void Parameters::prepareToPlay(double sampleRate) noexcept
@@ -67,73 +65,51 @@ void Parameters::prepareToPlay(double sampleRate) noexcept
     for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
-        band.preGainSmoother.reset(sampleRate,duration);
+        band.preGainSmoother->reset(sampleRate,duration);
     }
 }
 
-/*
+
 void Parameters::reset() noexcept
 {
-    for(auto i=0; i<NUM_EQ_BANDS; i++)
+    for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        EQ::Band band = eqParams->getParamsForBand(i);
-        band.fc
-    }
-    eqFreqs = ParamDeclarations::EQ_DEFAULT_FREQS;
-    eqQs = ParamDeclarations::EQ_DEFAULT_QS;
-    eqGainsInDB = {0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
-    eqBypasses = {false,false,false,false,false,false};
-    
-    for(auto i=0; i<ParamDeclarations::EQ_BAND_NUM; i++)
-    {
-        eqFreqSmoothers[i].setCurrentAndTargetValue(eqFreqParams[i]->get());
-        eqQSmoothers[i].setCurrentAndTargetValue(eqQParams[i]->get());
-        eqGainInDBSmoothers[i].setCurrentAndTargetValue(juce::Decibels::decibelsToGain(eqGainsInDB[i]));
+        EQ::Band band = eqParams.getParamsForBand(i);
+        band.fcSmoother->setCurrentAndTargetValue(band.fc->get());
+        band.QSmoother->setCurrentAndTargetValue(band.Q->get());
+        band.gainInDBSmoother->setCurrentAndTargetValue(band.gainInDB->get());
     }
     
-    saturationPreGains = {0.0f,0.0f,0.0f,0.0f};
-    saturationBypasses = {false,false,false,false};
-    
-    for(auto i=0; i<ParamDeclarations::SATURATION_BAND_NUM;i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS;i++)
     {
-        saturationPreGainSmoothers[i].setCurrentAndTargetValue(saturationPreGainParams[i]->get());
+        Saturation::Band band = saturationParams.getParamsForBand(i);
+        band.preGainSmoother->setCurrentAndTargetValue(band.preGain->get());
     }
-
 }
 
 void Parameters::update() noexcept
 {
-    for(auto i=0; i<ParamDeclarations::EQ_BAND_NUM; i++)
+    for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        eqFreqSmoothers[i].setTargetValue(eqFreqParams[i]->get());
-        eqQSmoothers[i].setTargetValue(eqQParams[i]->get());
-        eqGainInDBSmoothers[i].setTargetValue(juce::Decibels::decibelsToGain(eqGainInDBParams[i]->get()));
-        eqBypasses[i] = eqBypassParams[i]->get();
+        EQ::Band band = eqParams.getParamsForBand(i);
+        band.fcSmoother->setTargetValue(band.fc->get());
+        band.QSmoother->setTargetValue(band.Q->get());
+        band.gainInDBSmoother->setTargetValue(band.gainInDB->get());
     }
     
-    for(auto i=0; i<ParamDeclarations::SATURATION_BAND_NUM; i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS;i++)
     {
-        saturationPreGainSmoothers[i].setTargetValue(saturationPreGainParams[i]->get());
-        saturationBypasses[i] = saturationBypassParams[i]->get();
+        Saturation::Band band = saturationParams.getParamsForBand(i);
+        band.preGainSmoother->setTargetValue(band.preGain->get());
     }
  }
  
 
 void Parameters::smoothen() noexcept
 {
-    for(auto i=0; i<ParamDeclarations::EQ_BAND_NUM; i++)
-    {
-        eqFreqs[i] = eqFreqSmoothers[i].getNextValue();
-        eqGainsInDB[i] = eqGainInDBSmoothers[i].getNextValue();
-        eqQs[i] = eqQSmoothers[i].getNextValue();
-    }
-    
-    for(auto i=0; i<ParamDeclarations::SATURATION_BAND_NUM; i++)
-    {
-        saturationPreGains[i] = saturationPreGainSmoothers[i].getNextValue();
-    }
+
 }
-*/
+
 
 #include "Parameters.h"
 

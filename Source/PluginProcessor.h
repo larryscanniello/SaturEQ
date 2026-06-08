@@ -19,8 +19,6 @@
 /**
 */
 
-const int BANDS = 4;
-const int HIGH_SR_THRESHOLD = 176400;
 
 class SaturEQAudioProcessor  : public juce::AudioProcessor
 {
@@ -70,11 +68,9 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     
     size_t resampleFrequency = 196000.0f;
     
-    juce::dsp::ProcessSpec specs;
+    juce::dsp::ProcessSpec spec;
     
-    std::unique_ptr<LinkwitzRileyManager> lrManager = std::make_unique<LinkwitzRileyManager();
-    
-    std::unique_ptr<EQManager> eqManager = std::make_unique
+    LinkwitzRileyManager lrManager;
     
     juce::dsp::Oversampling<float> oversampler{ (size_t) getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
     

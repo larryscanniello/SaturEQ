@@ -19,8 +19,12 @@ class LinkwitzRileyManager {
     
 public:
     LinkwitzRileyManager(Parameters::Saturation params, juce::dsp::ProcessSpec spec)
+    : params(params), spec(spec)
     {
-        
+        for(auto i=0; i<NUM_SATURATION_BANDS; i++)
+        {
+            addSplit(SATURATION_BAND_DEFAULT_FREQS[i]);
+        }
     }
     
     void addSplit(float freq);
@@ -33,7 +37,7 @@ public:
     
     std::vector<float> getSplitFrequencies() {return frequencies;};
     
-    int getSampleRate(){ return sampleRate;}
+    int getSampleRate(){ return spec.sampleRate;}
     
     void setSampleRate(int sr);
     
@@ -43,9 +47,7 @@ private:
     
     Parameters::Saturation params;
     
-    int sampleRate;
-    
-    int numChannels;
+    juce::dsp::ProcessSpec spec;
     
     std::vector<std::pair<LowPass,HighPass>> filters;
     
@@ -66,15 +68,14 @@ private:
         {
             return juce::dsp::AudioBlock<type> (buffer).getSubBlock(0, numSamples);
         }
-        
+    
         juce::AudioBuffer<type> buffer;
         juce::dsp::AudioBlock<type> block;
     };
     
     template<typename type>
     struct Bands{
-        std::vector<juce::dsp::AudioBlock<type>> blocks; //need this pre-allocated to return without allocating memory
-        std::vector<std::unique_ptr<Band<type>>> ptrs;
+        
         void resize(size_t numBands,size_t numChannels, size_t samplesPerBlock)
         {
             ptrs.resize(numBands,std::make_unique<Band<type>>(numChannels,samplesPerBlock));
@@ -85,9 +86,12 @@ private:
             }
             
         }
+    private:
+        std::vector<juce::dsp::AudioBlock<type>> blocks; //need this pre-allocated to return without allocating memory
+        std::vector<std::unique_ptr<Band<type>>> ptrs;
     };
     
-    Bands bands;
+    Bands<float> bands;
 
     std::vector<float> frequencies;
     

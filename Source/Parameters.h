@@ -8,9 +8,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-
-const auto NUM_EQ_BANDS = 6;
-const auto NUM_SATURATION_BANDS = 6;
+#include "ParamDeclarations.h"
 
 class Parameters
 {
@@ -49,7 +47,7 @@ public:
             juce::AudioParameterBool* bypass;
             juce::AudioParameterFloat* preGain;
             
-            juce::LinearSmoothedValue<float> preGainSmoother;
+            juce::LinearSmoothedValue<float>* preGainSmoother;
             
             juce::AudioParameterFloat* freqBandStart;
         };
@@ -66,7 +64,7 @@ public:
     };
     
     
-    Parameters(juce::AudioProcessorValueTreeState& apvts);
+    Parameters(juce::AudioProcessorValueTreeState& apvts,juce::dsp::ProcessSpec &spec);
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
@@ -77,7 +75,6 @@ public:
     void setDefaults() noexcept;
     
     float freq = 200.0f;
-private:
     
     EQ eqParams;
     Saturation saturationParams;

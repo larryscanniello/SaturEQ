@@ -19,8 +19,9 @@ namespace ParamDeclarations {
 inline constexpr auto VERSION_HINT = 1;
 inline constexpr auto EQ_NUM_BANDS = 6;
 inline constexpr auto SATURATION_NUM_BANDS = 4;
-inline constexpr auto EQ_DEFAULT_FREQS = {75.0f,100.0f,250.0f,1040.0f,2500.0f,7500.0f};
-inline constexpr auto EQ_DEFAULT_QS = {1.0f,0.6f,0.3f,0.41f,0.20f,1.0f};
+inline constexpr float SATURATION_BAND_DEFAULT_FREQS[] = {0.0f,150.0f,300.0f,1000.0f};
+inline constexpr float EQ_DEFAULT_FREQS[] = {75.0f,100.0f,250.0f,1040.0f,2500.0f,7500.0f};
+inline constexpr float EQ_DEFAULT_QS[] = {1.0f,0.6f,0.3f,0.41f,0.20f,1.0f};
     
 enum FilterStatus {
     off, on

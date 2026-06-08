@@ -27,18 +27,10 @@ SaturEQAudioProcessor::SaturEQAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-        params(apvts)
+        params(apvts,spec), lrManager(params.saturationParams,spec)
 #endif
 {
-    lrManager = std::make_unique<LinkwitzRileyManager>();
-    filters.resize(Params::EQ_BAND_NUM);
-    
-    filters[0] = std::make_unique<HighPass>();
-    filters[1] = std::make_unique<Peaking>();
-    filters[2] = std::make_unique<Peaking>();
-    filters[3] = std::make_unique<Peaking>();
-    filters[4] = std::make_unique<Peaking>();
-    filters[5] = std::make_unique<LowPass>();
+
 }
 
 SaturEQAudioProcessor::~SaturEQAudioProcessor()
@@ -115,9 +107,9 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     params.prepareToPlay(sampleRate);
     params.reset();
     
-    specs.sampleRate = sampleRate;
-    specs.maximumBlockSize = samplesPerBlock;
-    specs.numChannels = static_cast<size_t>(getTotalNumInputChannels());
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = static_cast<size_t>(getTotalNumInputChannels());
     
     oversampler.initProcessing(samplesPerBlock);
     
