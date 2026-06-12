@@ -31,13 +31,13 @@ template <class T>
     class FloatParameters {
     public:
         static std::unique_ptr<juce::AudioParameterFloat> get(const bool automate = true) {
-            auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(automate).withLabel(T::kName);
+            auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(automate).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(T::ID, VERSION_HINT),
                                                                T::Name, T::Range, T::Default, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterFloat> get(const std::string& suffix) {
-            auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(true).withLabel(T::kName);
+            auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                                T::Name + suffix, T::Range, T::Default, attributes);
         }
@@ -66,26 +66,26 @@ template <class T>
     class BoolParameters {
     public:
         static std::unique_ptr<juce::AudioParameterBool> get(const bool automate = true) {
-            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(automate).withLabel(T::kName);
+            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(automate).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID, VERSION_HINT),
                                                               T::Name, T::Default, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterBool> get(const std::string& suffix) {
-            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(true).withLabel(T::kName);
+            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                               T::Name + suffix, T::Default, attributes);
         }
         
         static std::unique_ptr<juce::AudioParameterBool> get(const std::string& suffix, bool defaultVal) {
-            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(true).withLabel(T::kName);
+            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                               T::Name + suffix, defaultVal, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterBool> get(const std::string& suffix, const bool meta,
                                                              const bool automate) {
-            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(automate).withLabel(T::kName).
+            auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(automate).withLabel(T::Name).
                                                                    withMeta(meta);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                               T::Name + suffix, T::Default, attributes);
@@ -101,20 +101,20 @@ template <class T>
     class ChoiceParameters {
     public:
         static std::unique_ptr<juce::AudioParameterChoice> get(const bool automate = true) {
-            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(automate).withLabel(T::kName);
+            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(automate).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID, VERSION_HINT),
                                                                 T::Name, T::Choices, T::Default, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterChoice> get(const std::string& suffix) {
-            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(true).withLabel(T::kName);
+            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                                 T::Name + suffix, T::Choices, T::Default,
                                                                 attributes);
         }
         
         static std::unique_ptr<juce::AudioParameterChoice> get(const std::string& suffix,juce::StringArray defaultVal) {
-            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(true).withLabel(T::kName);
+            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                                 T::Name + suffix, T::Choices, defaultVal,
                                                                 attributes);
@@ -123,7 +123,7 @@ template <class T>
 
         static std::unique_ptr<juce::AudioParameterChoice> get(const std::string& suffix, const bool meta,
                                                                const bool automate) {
-            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(automate).withLabel(T::kName).
+            auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(automate).withLabel(T::Name).
                                                                      withMeta(meta);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
                                                                 T::Name + suffix, T::Choices, T::Default,
