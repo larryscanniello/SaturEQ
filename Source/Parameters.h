@@ -69,15 +69,18 @@ public:
     };
     
     
-    Parameters(juce::AudioProcessorValueTreeState& apvts,juce::dsp::ProcessSpec &spec);
+    
+    
+    Parameters(juce::AudioProcessorValueTreeState& apvts);
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
     void prepareToPlay(double sampleRate) noexcept;
     void reset() noexcept;
     void update() noexcept;
-    void smoothen() noexcept;
     void setDefaults() noexcept;
+    
+    juce::dsp::ProcessSpec spec;
     
     float freq = 200.0f;
     

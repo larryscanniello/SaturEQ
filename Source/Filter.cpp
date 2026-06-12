@@ -26,7 +26,7 @@ void Filter::smoothen()
         float fc = params.fcSmoother->getNextValue();
         float Q = params.QSmoother->getNextValue();
         float gainInDB = params.gainInDBSmoother->getNextValue();
-        strategy.updateCoefficients(sampleRate,fc,Q,gainInDB,a,b);
+        strategy.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
     }
 }
 

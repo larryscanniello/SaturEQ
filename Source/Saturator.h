@@ -16,7 +16,7 @@
 class Saturator {
 
 public:
-    Saturator(Parameters::Saturation::Band params) : params(params) {}
+    Saturator(Parameters::Saturation::Band params, juce::dsp::ProcessSpec spec) : params(params) {}
     
     void processBlock(juce::dsp::AudioBlock<float>& input);
     
@@ -28,6 +28,10 @@ public:
     
     void smoothen();
     
+    juce::dsp::ProcessSpec spec;
+    
 private:
     Parameters::Saturation::Band params;
+    
+    
 };

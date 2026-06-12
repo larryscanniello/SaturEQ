@@ -15,17 +15,6 @@
 
 const int NUM_STAGES = 2;
 
-void LinkwitzRileyManager::setSampleRate(int sr)
-{
-    int oldsr = sampleRate;
-    float ratio = float(sr)/float(oldsr);
-    for(int band=0;band<filters.size();band++){
-        for(int stage=0; stage < NUM_STAGES; stage++){
-            filters[band][stage].setSampleRate(sr);
-        }
-    }
-}
-
 void LinkwitzRileyManager::addSplit(float freq)
 {
     //Inserts into vector and keeps freqs sorted

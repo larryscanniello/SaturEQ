@@ -64,11 +64,11 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
         *this, nullptr, "Parameters", Parameters::createParameterLayout()
     };
     
+    juce::dsp::ProcessSpec spec;
+    
     Parameters params;
     
     size_t resampleFrequency = 196000.0f;
-    
-    juce::dsp::ProcessSpec spec;
     
     LinkwitzRileyManager lrManager;
     

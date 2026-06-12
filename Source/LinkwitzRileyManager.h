@@ -18,12 +18,12 @@
 class LinkwitzRileyManager {
     
 public:
-    LinkwitzRileyManager(Parameters::Saturation params, juce::dsp::ProcessSpec spec)
+    LinkwitzRileyManager(Parameters::Saturation params, juce::dsp::ProcessSpec& spec)
     : params(params), spec(spec)
     {
-        for(auto i=0; i<NUM_SATURATION_BANDS; i++)
+        for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
         {
-            addSplit(SATURATION_BAND_DEFAULT_FREQS[i]);
+            addSplit(ParamDeclarations::SATURATION_BAND_DEFAULT_FREQS[i]);
         }
     }
     
@@ -36,10 +36,6 @@ public:
     juce::dsp::AudioBlock<float>& sumSignal(juce::dsp::AudioBlock<float> &output);
     
     std::vector<float> getSplitFrequencies() {return frequencies;};
-    
-    int getSampleRate(){ return spec.sampleRate;}
-    
-    void setSampleRate(int sr);
     
     void prepare(size_t channelSize, size_t numBands, size_t samplesPerBlock);
     

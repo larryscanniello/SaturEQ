@@ -44,20 +44,21 @@ protected:
     
     void smoothen();
     
+    juce::dsp::ProcessSpec spec;
+    
 public:
     
     void update();
 
-    Filter(size_t numChannels,
-           size_t sampleRate,
+    Filter(juce::dsp::ProcessSpec spec,
            Parameters::EQ::Band p,
-           CoefficientStrategy s
+           CoefficientStrategy strategy
            )
-    : sampleRate(sampleRate), params(p), strategy(s)
+    :  params(p), strategy(strategy), spec(spec) 
     {
-        x.resize(numChannels);
-        y.resize(numChannels);
-        strategy.updateCoefficients(sampleRate,*p.fc,*p.Q,*p.gainInDB,a,b);
+        x.resize(spec.numChannels);
+        y.resize(spec.numChannels);
+        strategy.updateCoefficients(spec.sampleRate,*p.fc,*p.Q,*p.gainInDB,a,b);
     }
     
     void setCoefficientStrategy(CoefficientStrategy s)

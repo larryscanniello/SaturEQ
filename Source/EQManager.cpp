@@ -28,7 +28,7 @@ void EQManager::update()
     }
 }
 
-void EQManager::initializeFilterCoefficients(size_t sr, size_t numChannels, size_t numBands, Parameters::EQ eqparams)
+void EQManager::initializeFilterCoefficients(size_t numBands, Parameters::EQ eqparams)
 {
     jassert(numBands >= 2);
         
@@ -38,7 +38,9 @@ void EQManager::initializeFilterCoefficients(size_t sr, size_t numChannels, size
     
     HighPass hpStrategy;
     
-    filters.emplace_back(numChannels,sr, eqparams.getFilterParams(0),hpStrategy);
+    size_t sr = spec.sampleRate;
+    
+    filters.emplace_back(spec, eqparams.getFilterParams(0),hpStrategy);
     
     for(auto i=1; i<filters.size()-1; i++)
     {
