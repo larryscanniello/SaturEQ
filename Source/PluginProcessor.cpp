@@ -163,7 +163,7 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     bandblocks = lrManager->splitSignal(upsampled);
     
-    saturator.processBands(bandblocks);
+    saturationManager.processBands(bandblocks);
     
     juce::dsp::AudioBlock<float> summed = lrManager -> sumSignal(upsampled);
     

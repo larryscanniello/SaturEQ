@@ -12,7 +12,7 @@
 #include "Parameters.h"
 #include "Filter.h"
 #include "LinkwitzRileyManager.h"
-#include "Saturator.h"
+#include "SaturationManager.h"
 #include <vector>
 
 //==============================================================================
@@ -74,7 +74,7 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     
     juce::dsp::Oversampling<float> oversampler{ (size_t) getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
     
-    Saturator saturator;
+    SaturationManager saturationManager;
     
     juce::dsp::AudioBlock<float> upsampled;
     

@@ -57,6 +57,11 @@ public:
             return params[bandNum];
         }
         
+        size_t getNumBands()
+        {
+            params.size();
+        }
+        
         
         private:
             std::vector<Band> params;
