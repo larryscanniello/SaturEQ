@@ -19,7 +19,7 @@
 class EQManager {
     
 public:
-    EQManager(juce::dsp::ProcessSpec Parameters::EQParams eqparams)
+    EQManager(juce::dsp::ProcessSpec Parameters::EQ eqparams)
     : spec, eqParams(eqparams)
     {
         initializeFilterCoefficients(sr, numBands, numChannels, eqparams);

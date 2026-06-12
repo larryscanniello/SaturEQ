@@ -49,7 +49,10 @@ Parameters::Saturation::Saturation(juce::AudioProcessorValueTreeState &apvts)
     }
 }
 
-Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apvts), saturationParams(apvts) {}
+Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apvts), saturationParams(apvts)
+{
+    
+}
     
 
 void Parameters::prepareToPlay(double sampleRate) noexcept
