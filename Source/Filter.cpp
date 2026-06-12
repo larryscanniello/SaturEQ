@@ -11,6 +11,25 @@
 #include "Filter.h"
 #include <juce_dsp/juce_dsp.h>
 
+void Filter::update()
+{
+    params.fcSmoother->setTargetValue(params.fc->get());
+    params.QSmoother->setTargetValue(params.Q->get());
+    params.gainInDBSmoother->setTargetValue(params.gainInDB->get());
+    bypass = params.bypass->get();
+}
+
+void Filter::smoothen()
+{
+    if(params.fcSmoother->isSmoothing() || params.QSmoother->isSmoothing() || params.gainInDBSmoother->isSmoothing())
+    {
+        float fc = params.fcSmoother->getNextValue();
+        float Q = params.QSmoother->getNextValue();
+        float gainInDB = params.gainInDBSmoother->getNextValue();
+        strategy.updateCoefficients(sampleRate,fc,Q,gainInDB,a,b);
+    }
+}
+
 void Filter::putSample(float sample,int channel){
     std::vector<float>& xChannel = x[channel];
     std::vector<float>& yChannel = y[channel];
@@ -28,20 +47,6 @@ void Filter::putSample(float sample,int channel){
     yChannel[curr] = sample;
 }
 
-
-void Filter::processBlock(juce::dsp::AudioBlock<float> &input, juce::dsp::AudioBlock<float> &output)
-{
-    for(int channel = 0; channel<input.getNumChannels();channel++){
-        auto channelData = input.getChannelPointer(channel);
-        auto writePtr = output.getChannelPointer(channel);
-        
-        for(int sample=0; sample<input.getNumSamples();sample++){
-            putSample(channelData[sample],channel);
-            writePtr[sample] = getSample(channel);
-        }
-    }
-}
-
 void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)
 {
     for(auto channel=0; channel<buf.getNumChannels();channel++)
@@ -49,13 +54,7 @@ void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)
         auto channelData = buf.getChannelPointer(channel);
         for(auto sample=0; sample<buf.getNumSamples();sample++)
         {
-            float fc = params.fcSmoother->getNextValue();
-            float Q = params.QSmoother->getNextValue();
-            float gainInDB = params.gainInDBSmoother->getNextValue();
-            if(params.fcSmoother->isSmoothing() || params.QSmoother->isSmoothing() || params.gainInDBSmoother->isSmoothing())
-            {
-                strategy.updateCoefficients(sampleRate,fc,Q,gainInDB,a,b);
-            }
+            smoothen();
             putSample(channelData[sample], channel);
             channelData[sample] = getSample(channel);
         }

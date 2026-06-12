@@ -25,9 +25,11 @@ public:
         initializeFilterCoefficients(sr, numBands, numChannels, eqparams);
     };
     
+    void update();
+    
     void processBlock(juce::dsp::AudioBlock<float>& buffer);
     
-    void initializeFilterCoefficients(size_t sr, size_t numBands, size_t numChannels, Parameters::EQParams eqparams);
+    void initializeFilterCoefficients(size_t sr, size_t numBands, size_t numChannels, Parameters::EQ eqparams);
     
 private:
     

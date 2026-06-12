@@ -36,15 +36,21 @@ protected:
     
     size_t sampleRate;
     
-    Parameters::EQParams::FilterParams params;
+    Parameters::EQ::Band params;
     
     CoefficientStrategy strategy;
     
+    bool bypass;
+    
+    void smoothen();
+    
 public:
+    
+    void update();
 
     Filter(size_t numChannels,
            size_t sampleRate,
-           Parameters::EQParams::FilterParams p,
+           Parameters::EQ::Band p,
            CoefficientStrategy s
            )
     : sampleRate(sampleRate), params(p), strategy(s)

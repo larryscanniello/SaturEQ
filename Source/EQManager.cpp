@@ -20,7 +20,15 @@ void EQManager::processBlock(juce::dsp::AudioBlock<float>& buffer)
     }
 }
 
-void EQManager::initializeFilterCoefficients(size_t sr, size_t numChannels, size_t numBands, Parameters::EQParams eqparams)
+void EQManager::update()
+{
+    for(Filter& filter: filters)
+    {
+        filter.update();
+    }
+}
+
+void EQManager::initializeFilterCoefficients(size_t sr, size_t numChannels, size_t numBands, Parameters::EQ eqparams)
 {
     jassert(numBands >= 2);
         
