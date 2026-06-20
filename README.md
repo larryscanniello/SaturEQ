@@ -1,1 +1,1 @@
-A saturator/EQ plugin in development.
+A multiband saturator/EQ plugin in development.
