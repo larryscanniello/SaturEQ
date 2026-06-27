@@ -16,8 +16,10 @@ static void castParameter(juce::AudioProcessorValueTreeState& apvts,
     jassert(destination);
 }
 
-Parameters::EQ::EQ(juce::AudioProcessorValueTreeState &apvts)
+Parameters::EQ::EQ(juce::AudioProcessorValueTreeState &apvts) : apvts(apvts)
 {
+    params.resize(ParamDeclarations::EQ_NUM_BANDS);
+    
     castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[0].fc);
     castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[1].fc);
     castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[2].fc);
@@ -39,9 +41,10 @@ Parameters::EQ::EQ(juce::AudioProcessorValueTreeState &apvts)
     }
 }
 
-Parameters::Saturation::Saturation(juce::AudioProcessorValueTreeState &apvts)
+Parameters::Saturation::Saturation(juce::AudioProcessorValueTreeState &apvts) : apvts(apvts)
 {
     params.resize(ParamDeclarations::SATURATION_NUM_BANDS);
+    
     for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
     {
         castParameter(apvts, ParamDeclarations::SaturationPreGain::Name, params[i].preGain);
@@ -53,11 +56,13 @@ Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apv
 {
     
 }
-    
 
-void Parameters::prepareToPlay(double sampleRate) noexcept
+
+void Parameters::prepareToPlay() noexcept
 {
     double duration = 0.02f;
+    
+    double sampleRate = spec.sampleRate;
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
         EQ::Band band = eqParams.getParamsForBand(i);

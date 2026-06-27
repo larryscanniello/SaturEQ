@@ -12,19 +12,18 @@
 #include <vector>
 #include <JuceHeader.h>
 #include "Parameters.h"
+#include "HighPass.h"
+#include "LowPass.h"
+#include "Peaking.h"
 
 class Filter
 {
     
 public:
-    class CoefficientStrategy {
-    public:
-        virtual ~CoefficientStrategy() = default;
-        virtual void updateCoefficients(size_t sampleRate, float fc, float Q, float gainInDB, std::vector<float>& a, std::vector<float>& b);
-    };
+    using CoefficientStrategy = std::variant<LowPass, HighPass, Peaking>;
     
 protected:
-    virtual ~Filter() = default;
+    
     
     std::vector<std::vector<float>> x;
     std::vector<std::vector<float>> y;
@@ -47,18 +46,33 @@ protected:
     juce::dsp::ProcessSpec spec;
     
 public:
+    virtual ~Filter() = default;
     
     void update();
 
-    Filter(juce::dsp::ProcessSpec spec,
-           Parameters::EQ::Band p,
+    Filter(Parameters::EQ::Band p,
            CoefficientStrategy strategy
            )
-    :  params(p), strategy(strategy), spec(spec) 
+    :  params(p), strategy(strategy)
     {
         x.resize(spec.numChannels);
         y.resize(spec.numChannels);
-        strategy.updateCoefficients(spec.sampleRate,*p.fc,*p.Q,*p.gainInDB,a,b);
+        
+        std::visit([&](auto& s) {
+              s.updateCoefficients(sampleRate, *p.fc, *p.Q, *p.gainInDB, a, b);
+          }, strategy);
+    }
+    
+    Filter(float fc,
+           float Q,
+           float gainInDB,
+           CoefficientStrategy strategy)
+    {
+        x.resize(spec.numChannels);
+        y.resize(spec.numChannels);
+        std::visit([&](auto& s) {
+            s.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
+        },strategy);
     }
     
     void setCoefficientStrategy(CoefficientStrategy s)

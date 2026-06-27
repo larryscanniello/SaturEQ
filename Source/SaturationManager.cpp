@@ -28,3 +28,12 @@ void SaturationManager::processBands(std::vector<juce::dsp::AudioBlock<float>> b
         saturators[i].processBlock(blocks[i]);
     }
 }
+
+void SaturationManager::prepareToPlay(juce::dsp::ProcessSpec spec)
+{
+    saturators.clear();
+    for(auto i=0; i<params.size();i++)
+    {
+        saturators.emplace_back(params.getParamsForBand(i),spec);
+    }
+}

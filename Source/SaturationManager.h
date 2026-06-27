@@ -15,18 +15,18 @@
 
 class SaturationManager {
     
-    SaturationManager(juce::dsp::ProcessSpec &spec, Parameters::Saturation params) : spec(spec), params(params)
-    {};
-    
-    juce::dsp::ProcessSpec spec;
+public:
+    SaturationManager(Parameters::Saturation& params) : params(params) {};
     
     void processBands(std::vector<juce::dsp::AudioBlock<float>> blocks);
     
     void update();
     
+    void prepareToPlay(juce::dsp::ProcessSpec spec);
+    
 private:
     std::vector<Saturator> saturators;
     
-    Parameters::Saturation params;
+    Parameters::Saturation& params;
     
 };

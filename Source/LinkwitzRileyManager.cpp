@@ -9,8 +9,9 @@
 */
 
 #include "LinkwitzRileyManager.h"
-#include "SecondOrderButterworth.h"
 #include "Filter.h"
+#include "HighPass.h"
+#include "LowPass.h"
 #include <vector>
 
 const int NUM_STAGES = 2;
@@ -31,55 +32,59 @@ void LinkwitzRileyManager::removeSplit(int splitNum){
 
 void LinkwitzRileyManager::deriveFiltersFromFrequencies()
 {
-    for(int i=0; i< frequencies.size(); i++){
-        filters[i][0] = SecondOrderButterworth(sampleRate, numChannels, frequencies[i], 0,0, true);
-        filters[i][1] = SecondOrderButterworth(sampleRate, numChannels, frequencies[i], 0,0, false);
+    filters.clear();
+    
+    for(int i=0; i<frequencies.size(); i++){
+        LowPass lpStrategy;
+        HighPass hpStrategy;
+        float fc = *params.getParamsForBand(i).freqBandStart;
+        Filter lp{fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f,lpStrategy};
+        Filter hp{fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f,hpStrategy};
+        std::pair pair{lp,hp};
+        filters.emplace_back(pair);
     }
 }
 
-void LinkwitzRileyManager::prepare(size_t channelSize,size_t numBands,size_t samplesPerBlock)
+void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
-    bands.resize(numBands,channelSize,samplesPerBlock);
+    bands.resize(params.size(),spec);
 }
 
-juce::dsp::AudioBlock<float>& LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlock<float> &output)
+juce::dsp::AudioBlock<float> LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlock<float> &output)
 {
-    jassert(output.getNumSamples()==bands.ptrs[0]->buffer.getNumSamples());
-    jassert(output.getNumChannels()==bands.ptrs[0]->buffer.getNumChannels());
     
     output.clear();
     
-    for(auto band=1; band<bands.blocks.size(); band++)
+    for(auto i=1; i<bands.size(); i++)
     {
-        bands.blocks[0].add(bands.blocks[band]);
+        juce::dsp::AudioBlock<float> block = bands.getBlock(i);
+        bands.getBlock(0).add(block);
     }
     
-    return bands.blocks[0];
+    return bands.getBlock(0);
 }
 
 
-std::vector<juce::dsp::AudioBlock<float>>& LinkwitzRileyManager::splitSignal(juce::dsp::AudioBlock<float> &input)
+const std::vector<juce::dsp::AudioBlock<float>> LinkwitzRileyManager::splitSignal(juce::dsp::AudioBlock<float> &input)
 {
-    jassert(filters.size()>=0);
     
-    if(filters.size()<=0)
+    if(filters.size()==0)
     {
-        juce::dsp::AudioBlock<float> internalBand(bands.ptrs[0]->buffer);
+        juce::dsp::AudioBlock<float> internalBand{bands.getBlock(0)};
         internalBand.copyFrom(input);
-        return bands.blocks;
+        return bands.getBlocks();
     };
-    
-    filters[0][0].processBlock(input, bands.ptrs[0]->block);
+
+    filters[0].first.processBlock(input, bands.getPointers()[0]->block);
     
     auto n = filters.size();
     
     for(int i=0; i<n-1;i++){
-        filters[i][1].processBlock(input, bands.ptrs[i+1]->block);
-        filters[i+1][0].processBlock(bands.ptrs[i+1]->block, bands.ptrs[i+1]->block);
+        filters[i].second.processBlock(input, bands.getPointers()[i+1]->block);
+        filters[i+1].first.processBlock(bands.getPointers()[i+1]->block, bands.getPointers()[i+1]->block);
     }
     
-    filters[n-1][1].processBlock(input, bands.ptrs[n-1]->block);
+    filters[n-1].second.processBlock(input, bands.getPointers()[n-1]->block);
     
-    return bands.blocks;
+    return bands.getBlocks();
 }
-

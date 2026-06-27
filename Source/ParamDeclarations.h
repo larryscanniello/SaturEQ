@@ -33,13 +33,13 @@ template <class T>
         static std::unique_ptr<juce::AudioParameterFloat> get(const bool automate = true) {
             auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(automate).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(T::ID, VERSION_HINT),
-                                                               T::Name, T::Range, T::Default, attributes);
+                                                               T::Name, T::Range, T::DefaultV, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterFloat> get(const std::string& suffix) {
             auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
-                                                               T::Name + suffix, T::Range, T::Default, attributes);
+                                                               T::Name + suffix, T::Range, T::DefaultV, attributes);
         }
         
         static std::unique_ptr<juce::AudioParameterFloat> get(const std::string& suffix, const float defaultVal) {
@@ -53,7 +53,7 @@ template <class T>
             auto attributes = juce::AudioParameterFloatAttributes().withAutomatable(automate).withLabel(T::Name).
                                                                     withMeta(meta);
             return std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
-                                                               T::Name + suffix, T::Range, T::Default, attributes);
+                                                               T::Name + suffix, T::Range, T::DefaultV, attributes);
         }
 
         inline static float convertTo01(const float x) {
@@ -68,13 +68,13 @@ template <class T>
         static std::unique_ptr<juce::AudioParameterBool> get(const bool automate = true) {
             auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(automate).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID, VERSION_HINT),
-                                                              T::Name, T::Default, attributes);
+                                                              T::Name, T::DefaultV, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterBool> get(const std::string& suffix) {
             auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
-                                                              T::Name + suffix, T::Default, attributes);
+                                                              T::Name + suffix, T::DefaultV, attributes);
         }
         
         static std::unique_ptr<juce::AudioParameterBool> get(const std::string& suffix, bool defaultVal) {
@@ -88,7 +88,7 @@ template <class T>
             auto attributes = juce::AudioParameterBoolAttributes().withAutomatable(automate).withLabel(T::Name).
                                                                    withMeta(meta);
             return std::make_unique<juce::AudioParameterBool>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
-                                                              T::Name + suffix, T::Default, attributes);
+                                                              T::Name + suffix, T::DefaultV, attributes);
         }
 
         inline static float convertTo01(const bool x) {
@@ -103,13 +103,13 @@ template <class T>
         static std::unique_ptr<juce::AudioParameterChoice> get(const bool automate = true) {
             auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(automate).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID, VERSION_HINT),
-                                                                T::Name, T::Choices, T::Default, attributes);
+                                                                T::Name, T::Choices, T::DefaultV, attributes);
         }
 
         static std::unique_ptr<juce::AudioParameterChoice> get(const std::string& suffix) {
             auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(true).withLabel(T::Name);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
-                                                                T::Name + suffix, T::Choices, T::Default,
+                                                                T::Name + suffix, T::Choices, T::DefaultV,
                                                                 attributes);
         }
         
@@ -126,7 +126,7 @@ template <class T>
             auto attributes = juce::AudioParameterChoiceAttributes().withAutomatable(automate).withLabel(T::Name).
                                                                      withMeta(meta);
             return std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
-                                                                T::Name + suffix, T::Choices, T::Default,
+                                                                T::Name + suffix, T::Choices, T::DefaultV,
                                                                 attributes);
         }
 
@@ -240,7 +240,7 @@ class EQFreq0 : public FloatParameters<EQFreq0> {
         static constexpr auto ID = "freq0";
         static constexpr auto Name = "Freq0";
         inline static const auto Range = getLogMidRange(20.f, 20000.f, 75.0f, 0.1f);
-        static constexpr auto Default = 75.0f;
+        static constexpr auto DefaultV = 75.0f;
     };
 
 class EQFreq1 : public FloatParameters<EQFreq1> {
@@ -349,7 +349,7 @@ public:
 
 class SaturationPreGain : public FloatParameters<SaturationPreGain> {
     public:
-        static constexpr auto ID = "saturationPreGain";
+        static constexpr auto ID = "s_pg";
         static constexpr auto Name = "Saturation Pre Gain";
         inline static const auto Range = getLogMidRange(0.025f, 25.f, 0.707f, 0.001f);
         static constexpr auto DefaultV = 0.707f;
@@ -357,12 +357,12 @@ class SaturationPreGain : public FloatParameters<SaturationPreGain> {
 
 class SaturationBypass : public BoolParameters<SaturationBypass> {
 public:
-    static constexpr auto ID = "dynamic_bypass";
+    static constexpr auto ID = "s_bp";
     static constexpr auto Name = "Dynamic Bypass";
     static constexpr auto DefaultV = false;
 };
 
-inline juce::AudioProcessorValueTreeState::ParameterLayout getParameterLayout(){
+static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout(){
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     layout.add(
     EQFreq0::get(true),EQFreq1::get(true),EQFreq2::get(true),
@@ -370,14 +370,14 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout getParameterLayout(){
     EQQ0::get(true),EQQ1::get(true),EQQ2::get(true),
     EQQ3::get(true),EQQ4::get(true),EQQ5::get(true)
                );
-    for(size_t i=0; i< EQ_BAND_NUM; i++)
+    for(size_t i=0; i< EQ_NUM_BANDS; i++)
     {
         const auto suffix = std::to_string(i);
         layout.add(
                    EQGain::get(suffix),
                    EQBypass::get(suffix));
         }
-    for(size_t i=0; i< SATURATION_BAND_NUM; i++)
+    for(size_t i=0; i< SATURATION_NUM_BANDS; i++)
     {
         const auto suffix = std::to_string(i);
         layout.add(
@@ -385,7 +385,8 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout getParameterLayout(){
                    SaturationBypass::get(suffix)
                    );
     }
-}
+    return layout;
+};
 
 
 

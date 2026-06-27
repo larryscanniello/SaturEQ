@@ -26,7 +26,9 @@ void Filter::smoothen()
         float fc = params.fcSmoother->getNextValue();
         float Q = params.QSmoother->getNextValue();
         float gainInDB = params.gainInDBSmoother->getNextValue();
-        strategy.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
+        std::visit([&](auto& s) {
+            s.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
+        },strategy);
     }
 }
 
@@ -45,6 +47,21 @@ void Filter::putSample(float sample,int channel){
         processedSample += b[i] * yChannel[(curr-i+ySize) % ySize];
     }
     yChannel[curr] = sample;
+}
+
+void Filter::processBlock(juce::dsp::AudioBlock<float>& input, juce::dsp::AudioBlock<float>& output)
+{
+    for(auto channel=0; channel<output.getNumChannels(); channel++)
+    {
+        auto inputData = input.getChannelPointer(channel);
+        auto outputData = output.getChannelPointer(channel);
+        for(auto sample=0; sample<input.getNumSamples();sample++)
+        {
+            smoothen();
+            putSample(inputData[sample], channel);
+            outputData[sample] = getSample(channel);
+        }
+    }
 }
 
 void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)

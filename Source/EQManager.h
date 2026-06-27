@@ -19,17 +19,15 @@
 class EQManager {
     
 public:
-    EQManager(juce::dsp::ProcessSpec Parameters::EQ eqparams)
-    : spec, eqParams(eqparams)
-    {
-        initializeFilterCoefficients(sr, numBands, numChannels, eqparams);
-    };
+    EQManager(Parameters::EQ eqParams) : eqParams(eqParams) {};
     
     void update();
     
     void processBlock(juce::dsp::AudioBlock<float>& buffer);
     
-    void initializeFilterCoefficients(Parameters::EQ eqparams);
+    void updateFilters(size_t numBands, juce::dsp::ProcessSpec spec);
+    
+    void prepareToPlay(juce::dsp::ProcessSpec spec);
     
 private:
     
@@ -40,7 +38,7 @@ private:
     size_t sampleRate;
     size_t numChannels;
     
-    Parameters::EQParams eqParams;
+    Parameters::EQ eqParams;
 
     std::vector<Filter> filters;
     

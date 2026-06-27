@@ -13,6 +13,7 @@
 #include "Filter.h"
 #include "LinkwitzRileyManager.h"
 #include "SaturationManager.h"
+#include "EQManager.h"
 #include <vector>
 
 //==============================================================================
@@ -61,7 +62,7 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     juce::AudioProcessorValueTreeState apvts {
-        *this, nullptr, "Parameters", Parameters::createParameterLayout()
+        *this, nullptr, "Parameters", ParamDeclarations::createParameterLayout()
     };
     
     juce::dsp::ProcessSpec spec;
@@ -72,9 +73,11 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     
     LinkwitzRileyManager lrManager;
     
-    juce::dsp::Oversampling<float> oversampler{ (size_t) getTotalNumOutputChannels(), 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
-    
     SaturationManager saturationManager;
+    
+    EQManager eqManager;
+    
+    juce::dsp::Oversampling<float> oversampler{ (size_t) 2, 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
     
     juce::dsp::AudioBlock<float> upsampled;
     

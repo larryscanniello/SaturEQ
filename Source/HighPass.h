@@ -9,10 +9,15 @@
 */
 
 #pragma once
+#include <JuceHeader.h>
 
-class HighPass : public Filter::CoefficientStrategy {
+
+
+class HighPass {
     
 public:
+    
+    static constexpr float PI = juce::MathConstants<float>::pi;
     
     void updateCoefficients(size_t sampleRate, float fc, float Q,[[maybe_unused]] float gainInDB,std::vector<float> &a, std::vector<float> &b)
     {

@@ -27,7 +27,7 @@ SaturEQAudioProcessor::SaturEQAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-        params(apvts,spec), lrManager(params.saturationParams,spec)
+        params(apvts), lrManager(params.saturationParams), saturationManager(params.saturationParams), eqManager(params.eqParams)
 #endif
 {
 
@@ -104,12 +104,16 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    params.prepareToPlay(sampleRate);
+    params.prepareToPlay();
     params.reset();
     
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
-    spec.numChannels = static_cast<size_t>(getTotalNumInputChannels());
+    spec.numChannels = static_cast<uint32_t>(getTotalNumInputChannels());
+    
+    eqManager.prepareToPlay(spec);
+    saturationManager.prepareToPlay(spec);
+    lrManager.prepareToPlay(spec);
     
     oversampler.initProcessing(samplesPerBlock);
     
@@ -161,16 +165,13 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     upsampled = oversampler.processSamplesUp(buffer);
     
-    bandblocks = lrManager->splitSignal(upsampled);
+    bandblocks = lrManager.splitSignal(upsampled);
     
     saturationManager.processBands(bandblocks);
     
-    juce::dsp::AudioBlock<float> summed = lrManager -> sumSignal(upsampled);
+    juce::dsp::AudioBlock<float> summed = lrManager.sumSignal(upsampled);
     
-    for(auto &filter : filters)
-    {
-        filter.processBlock(summed);
-    }
+    eqManager.processBlock(summed);
     
     juce::dsp::AudioBlock<float> bufferblock = juce::dsp::AudioBlock<float>(buffer);
     

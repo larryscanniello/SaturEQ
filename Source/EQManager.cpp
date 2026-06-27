@@ -28,7 +28,12 @@ void EQManager::update()
     }
 }
 
-void EQManager::initializeFilterCoefficients(size_t numBands, Parameters::EQ eqparams)
+void EQManager::prepareToPlay(juce::dsp::ProcessSpec)
+{
+    updateFilters(eqParams.size(),spec);
+}
+
+void EQManager::updateFilters(size_t numBands, juce::dsp::ProcessSpec spec)
 {
     jassert(numBands >= 2);
         
@@ -38,17 +43,15 @@ void EQManager::initializeFilterCoefficients(size_t numBands, Parameters::EQ eqp
     
     HighPass hpStrategy;
     
-    size_t sr = spec.sampleRate;
-    
-    filters.emplace_back(spec, eqparams.getFilterParams(0),hpStrategy);
+    filters.emplace_back(eqParams.getParamsForBand(0),hpStrategy);
     
     for(auto i=1; i<filters.size()-1; i++)
     {
         Peaking peakingStrategy;
-        filters.emplace_back(numChannels,sr,eqparams.getFilterParams(i),peakingStrategy);
+        filters.emplace_back(eqParams.getParamsForBand(i),peakingStrategy);
     }
     
     LowPass lpStrategy;
     
-    filters.emplace_back(numChannels,sr,eqparams.getFilterParams(filters.size()-1),lpStrategy);
+    filters.emplace_back(eqParams.getParamsForBand(filters.size()-1),lpStrategy);
 }

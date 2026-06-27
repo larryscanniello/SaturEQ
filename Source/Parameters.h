@@ -16,10 +16,7 @@ public:
     
     struct EQ
     {
-        EQ(juce::AudioProcessorValueTreeState &apvts, size_t numBands) : apvts(apvts)
-        {
-            params.resize(numBands);
-        }
+        EQ(juce::AudioProcessorValueTreeState &apvts);
         
         struct Band
         {
@@ -42,6 +39,10 @@ public:
         {
             params.resize(numBands);
         }
+        size_t size()
+        {
+            return params.size();
+        }
         
         private:
             std::vector<Band> params;
@@ -50,10 +51,7 @@ public:
 
     struct Saturation
     {
-        Saturation(juce::AudioProcessorValueTreeState &apvts, size_t numBands) : apvts(apvts)
-        {
-            params.resize(numBands);
-        }
+        Saturation(juce::AudioProcessorValueTreeState &apvts);
         
         struct Band {
             juce::AudioParameterBool* bypass;
@@ -71,7 +69,7 @@ public:
         
         size_t getNumBands()
         {
-            params.size();
+            return params.size();
         }
         
         void resize(size_t numBands)
@@ -79,6 +77,10 @@ public:
             params.resize(numBands);
         }
         
+        size_t size()
+        {
+            return params.size();
+        }
         private:
             std::vector<Band> params;
             juce::AudioProcessorValueTreeState& apvts;
@@ -92,7 +94,7 @@ public:
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
-    void prepareToPlay(double sampleRate) noexcept;
+    void prepareToPlay() noexcept;
     void reset() noexcept;
     void update() noexcept;
     void setDefaults() noexcept;
