@@ -11,7 +11,6 @@
 #include <JuceHeader.h>
 #include "Parameters.h"
 #include "Filter.h"
-#include "LinkwitzRileyManager.h"
 #include "SaturationManager.h"
 #include "EQManager.h"
 #include <vector>
@@ -70,8 +69,6 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     Parameters params;
     
     size_t resampleFrequency = 196000.0f;
-    
-    LinkwitzRileyManager lrManager;
     
     SaturationManager saturationManager;
     

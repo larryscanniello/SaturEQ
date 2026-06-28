@@ -11,8 +11,11 @@
 #include "SaturationManager.h"
 
 
+
+
 void SaturationManager::update()
 {
+    lrManager.deriveFiltersFromFrequencies();
     for(auto &saturator : saturators)
     {
         saturator.update();
@@ -36,4 +39,5 @@ void SaturationManager::prepareToPlay(juce::dsp::ProcessSpec spec)
     {
         saturators.emplace_back(params.getParamsForBand(i),spec);
     }
+    lrManager.prepareToPlay(spec);
 }

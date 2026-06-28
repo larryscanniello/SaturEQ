@@ -20,6 +20,9 @@ public:
     
     static constexpr float PI = juce::MathConstants<float>::pi;
     
+    size_t aSize = 3;
+    size_t bSize = 3;
+    
     void updateCoefficients(size_t sampleRate, float fc, float Q,[[maybe_unused]] float gainInDB,std::vector<float> &a, std::vector<float> &b)
     {
         float omega_0 = 2.0f * PI * fc / sampleRate;

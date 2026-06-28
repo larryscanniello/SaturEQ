@@ -22,23 +22,26 @@ public:
     LinkwitzRileyManager(Parameters::Saturation& params)
     : params(params)
     {
-        for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
+        for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1; i++)
         {
-            addSplit(ParamDeclarations::SATURATION_BAND_DEFAULT_FREQS[i]);
+            //Initialize with placeholder values, will be updated on prepareToPlay
+            LowPass lp;
+            HighPass hp;
+            Filter lpf{0,0,0,lp};
+            Filter hpf{0,0,0,hp};
+            std::pair<Filter,Filter> pair{lpf,hpf};
+            filters.emplace_back(pair);
         }
+        deriveFiltersFromFrequencies();
     }
-    
-    void addSplit(float freq);
-    
-    void removeSplit(int splitNum);
     
     const std::vector<juce::dsp::AudioBlock<float>> splitSignal(juce::dsp::AudioBlock<float> &input);
     
     juce::dsp::AudioBlock<float> sumSignal(juce::dsp::AudioBlock<float> &output);
     
-    std::vector<float> getSplitFrequencies() {return frequencies;};
-    
     void prepareToPlay(juce::dsp::ProcessSpec spec);
+    
+    void deriveFiltersFromFrequencies();
     
 private:
     
@@ -121,9 +124,7 @@ private:
     };
     
     Bands bands;
-
-    std::vector<float> frequencies;
     
-    void deriveFiltersFromFrequencies();
+    
     
 };

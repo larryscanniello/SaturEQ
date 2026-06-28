@@ -20,36 +20,48 @@ Parameters::EQ::EQ(juce::AudioProcessorValueTreeState &apvts) : apvts(apvts)
 {
     params.resize(ParamDeclarations::EQ_NUM_BANDS);
     
-    castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[0].fc);
-    castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[1].fc);
-    castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[2].fc);
-    castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[3].fc);
-    castParameter(apvts,ParamDeclarations::EQFreq0::Name,params[4].fc);
-    castParameter(apvts,ParamDeclarations::EQFreq1::Name,params[5].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq0::ID,params[0].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq1::ID,params[1].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq2::ID,params[2].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq3::ID,params[3].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq4::ID,params[4].fc);
+    castParameter(apvts,ParamDeclarations::EQFreq5::ID,params[5].fc);
 
-    castParameter(apvts,ParamDeclarations::EQQ0::Name,params[0].Q);
-    castParameter(apvts,ParamDeclarations::EQQ1::Name,params[1].Q);
-    castParameter(apvts,ParamDeclarations::EQQ2::Name,params[2].Q);
-    castParameter(apvts,ParamDeclarations::EQQ3::Name,params[3].Q);
-    castParameter(apvts,ParamDeclarations::EQQ4::Name,params[4].Q);
-    castParameter(apvts,ParamDeclarations::EQQ5::Name,params[5].Q);
-    
+    castParameter(apvts,ParamDeclarations::EQQ0::ID,params[0].Q);
+    castParameter(apvts,ParamDeclarations::EQQ1::ID,params[1].Q);
+    castParameter(apvts,ParamDeclarations::EQQ2::ID,params[2].Q);
+    castParameter(apvts,ParamDeclarations::EQQ3::ID,params[3].Q);
+    castParameter(apvts,ParamDeclarations::EQQ4::ID,params[4].Q);
+    castParameter(apvts,ParamDeclarations::EQQ5::ID,params[5].Q);
+
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        castParameter(apvts,ParamDeclarations::EQGain::Name,params[i].gainInDB);
-        castParameter(apvts,ParamDeclarations::EQBypass::Name,params[i].gainInDB);
+        const auto suffix = std::to_string(i);
+        castParameter(apvts,ParamDeclarations::EQGain::ID   + suffix,params[i].gainInDB);
+        castParameter(apvts,ParamDeclarations::EQBypass::ID + suffix,params[i].bypass);
     }
 }
 
 Parameters::Saturation::Saturation(juce::AudioProcessorValueTreeState &apvts) : apvts(apvts)
 {
-    params.resize(ParamDeclarations::SATURATION_NUM_BANDS);
+    params.resize(ParamDeclarations::SATURATION_MAX_SPLITS + 1);
     
-    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1; i++)
     {
-        castParameter(apvts, ParamDeclarations::SaturationPreGain::Name, params[i].preGain);
-        castParameter(apvts, ParamDeclarations::SaturationBypass::Name, params[i].bypass);
+        const auto suffix = std::to_string(i);
+        castParameter(apvts, ParamDeclarations::SaturationPreGain::ID + suffix, params[i].preGain);
+        castParameter(apvts, ParamDeclarations::SaturationBypass::ID  + suffix, params[i].bypass);
     }
+    
+    freqsToSplitAt.resize(ParamDeclarations::SATURATION_MAX_SPLITS);
+    
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS; i++)
+    {
+        const auto suffix = std::to_string(i);
+        castParameter(apvts, ParamDeclarations::SaturationSplitFreq::ID + suffix, freqsToSplitAt[i]);
+    }
+
+    castParameter(apvts, ParamDeclarations::NumSplits::ID, numSplits);
 }
 
 Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apvts), saturationParams(apvts)
@@ -58,7 +70,7 @@ Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apv
 }
 
 
-void Parameters::prepareToPlay() noexcept
+void Parameters::prepareToPlay(juce::dsp::processSpec spec) noexcept
 {
     double duration = 0.02f;
     
@@ -70,7 +82,7 @@ void Parameters::prepareToPlay() noexcept
         band.QSmoother->reset(sampleRate, duration);
         band.gainInDBSmoother->reset(sampleRate, duration);
     }
-    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS; i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1; i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
         band.preGainSmoother->reset(sampleRate,duration);
@@ -88,7 +100,7 @@ void Parameters::reset() noexcept
         band.gainInDBSmoother->setCurrentAndTargetValue(band.gainInDB->get());
     }
     
-    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS;i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1;i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
         band.preGainSmoother->setCurrentAndTargetValue(band.preGain->get());
@@ -105,7 +117,7 @@ void Parameters::update() noexcept
         band.gainInDBSmoother->setTargetValue(band.gainInDB->get());
     }
     
-    for(auto i=0; i<ParamDeclarations::SATURATION_NUM_BANDS;i++)
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1;i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
         band.preGainSmoother->setTargetValue(band.preGain->get());

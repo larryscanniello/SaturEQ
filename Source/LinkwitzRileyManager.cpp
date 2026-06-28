@@ -16,39 +16,27 @@
 
 const int NUM_STAGES = 2;
 
-void LinkwitzRileyManager::addSplit(float freq)
-{
-    //Inserts into vector and keeps freqs sorted
-    frequencies.insert(upper_bound(frequencies.begin(), frequencies.end(), freq), freq);
-    deriveFiltersFromFrequencies();
-}
-
-void LinkwitzRileyManager::removeSplit(int splitNum){
-    
-    if(frequencies.size()<=0) return;
-    frequencies.erase(frequencies.begin() + splitNum);
-    deriveFiltersFromFrequencies();
-}
 
 void LinkwitzRileyManager::deriveFiltersFromFrequencies()
 {
-    filters.clear();
-    
-    for(int i=0; i<frequencies.size(); i++){
+    for(int i=0; i<params.getNumSplits(); i++){
         LowPass lpStrategy;
         HighPass hpStrategy;
-        float fc = *params.getParamsForBand(i).freqBandStart;
-        Filter lp{fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f,lpStrategy};
-        Filter hp{fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f,hpStrategy};
-        std::pair pair{lp,hp};
-        filters.emplace_back(pair);
+        float fc = params.getFreqToSplitAt(i);
+        std::pair<Filter,Filter> pair = filters[i];
+        pair.first.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
+        pair.second.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
+        filters[i] = pair;
     }
 }
 
 void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
+    deriveFiltersFromFrequencies();
     bands.resize(params.size(),spec);
 }
+
+
 
 juce::dsp::AudioBlock<float> LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlock<float> &output)
 {

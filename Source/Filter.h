@@ -49,14 +49,22 @@ public:
     virtual ~Filter() = default;
     
     void update();
+    
+    void updateCoefficients(float fc, float Q, float gainInDB)
+    {
+        std::visit([&](auto& s) {
+              s.updateCoefficients(sampleRate, fc, Q, gainInDB, a, b);
+          }, strategy);
+    }
 
     Filter(Parameters::EQ::Band p,
-           CoefficientStrategy strategy
-           )
+           CoefficientStrategy strategy)
     :  params(p), strategy(strategy)
     {
-        x.resize(spec.numChannels);
-        y.resize(spec.numChannels);
+        std::visit([&](auto& s) {
+            a.resize(s.aSize);
+            b.resize(s.bSize);
+        },strategy);
         
         std::visit([&](auto& s) {
               s.updateCoefficients(sampleRate, *p.fc, *p.Q, *p.gainInDB, a, b);
@@ -67,9 +75,13 @@ public:
            float Q,
            float gainInDB,
            CoefficientStrategy strategy)
+    : strategy(strategy)
     {
-        x.resize(spec.numChannels);
-        y.resize(spec.numChannels);
+        std::visit([&](auto& s) {
+            a.resize(s.aSize);
+            b.resize(s.bSize);
+        },strategy);
+        
         std::visit([&](auto& s) {
             s.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
         },strategy);

@@ -9,7 +9,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Filter.h"
-#include "LinkwitzRileyManager.h"
 #include "Saturator.h"
 #include "ParamDeclarations.h"
 #include "Peaking.h"
@@ -27,7 +26,7 @@ SaturEQAudioProcessor::SaturEQAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-        params(apvts), lrManager(params.saturationParams), saturationManager(params.saturationParams), eqManager(params.eqParams)
+        params(apvts), saturationManager(params.saturationParams), eqManager(params.eqParams)
 #endif
 {
 
@@ -113,7 +112,6 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     
     eqManager.prepareToPlay(spec);
     saturationManager.prepareToPlay(spec);
-    lrManager.prepareToPlay(spec);
     
     oversampler.initProcessing(samplesPerBlock);
     
@@ -165,11 +163,11 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     upsampled = oversampler.processSamplesUp(buffer);
     
-    bandblocks = lrManager.splitSignal(upsampled);
+    bandblocks = saturationManager.splitSignal(upsampled);
     
     saturationManager.processBands(bandblocks);
     
-    juce::dsp::AudioBlock<float> summed = lrManager.sumSignal(upsampled);
+    juce::dsp::AudioBlock<float> summed = saturationManager.sumSignal(upsampled);
     
     eqManager.processBlock(summed);
     

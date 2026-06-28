@@ -58,9 +58,11 @@ public:
             juce::AudioParameterFloat* preGain;
             
             juce::LinearSmoothedValue<float>* preGainSmoother;
-            
-            juce::AudioParameterFloat* freqBandStart;
         };
+        
+        
+        
+    
         
         Band getParamsForBand(size_t bandNum)
         {
@@ -81,11 +83,21 @@ public:
         {
             return params.size();
         }
+        size_t getFreqToSplitAt(size_t splitNum)
+        {
+            return freqsToSplitAt[splitNum]->get();
+        }
+        size_t getNumSplits()
+        {
+            return numSplits->get();
+        }
+        
         private:
             std::vector<Band> params;
             juce::AudioProcessorValueTreeState& apvts;
-            
-    };
+            std::vector<juce::AudioParameterFloat*> freqsToSplitAt;
+            juce::AudioParameterInt* numSplits;
+        };
     
     
     

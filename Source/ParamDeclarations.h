@@ -9,8 +9,8 @@
 */
 
 // The following code is a derivative work of the code from the ZLEqualizer,
-// which is licensed GPLv3. This code therefore is also licensed under the terms
-// of the GNU Public License, verison 3.
+// which is licensed AGPLv3. This code therefore is also licensed under the terms
+// of the AGPL, verison 3.
 
 #pragma once
 
@@ -18,8 +18,8 @@ namespace ParamDeclarations {
 
 inline constexpr auto VERSION_HINT = 1;
 inline constexpr auto EQ_NUM_BANDS = 6;
-inline constexpr auto SATURATION_NUM_BANDS = 4;
-inline constexpr float SATURATION_BAND_DEFAULT_FREQS[] = {0.0f,150.0f,300.0f,1000.0f};
+inline constexpr auto SATURATION_MAX_SPLITS = 5;
+inline constexpr float SATURATION_DEFAULT_SPLIT_FREQS[] = {200.f, 500.f, 1000.f, 3000.f, 8000.f};
 inline constexpr float EQ_DEFAULT_FREQS[] = {75.0f,100.0f,250.0f,1040.0f,2500.0f,7500.0f};
 inline constexpr float EQ_DEFAULT_QS[] = {1.0f,0.6f,0.3f,0.41f,0.20f,1.0f};
     
@@ -58,6 +58,40 @@ template <class T>
 
         inline static float convertTo01(const float x) {
             return T::kRange.convertTo0to1(x);
+        }
+    };
+
+template <class T>
+    class IntParameters {
+    public:
+        static std::unique_ptr<juce::AudioParameterInt> get(const bool automate = true) {
+            auto attributes = juce::AudioParameterIntAttributes().withAutomatable(automate).withLabel(T::Name);
+            return std::make_unique<juce::AudioParameterInt>(juce::ParameterID(T::ID, VERSION_HINT),
+                                                             T::Name, T::Min, T::Max, T::DefaultV, attributes);
+        }
+
+        static std::unique_ptr<juce::AudioParameterInt> get(const std::string& suffix) {
+            auto attributes = juce::AudioParameterIntAttributes().withAutomatable(true).withLabel(T::Name);
+            return std::make_unique<juce::AudioParameterInt>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
+                                                             T::Name + suffix, T::Min, T::Max, T::DefaultV, attributes);
+        }
+
+        static std::unique_ptr<juce::AudioParameterInt> get(const std::string& suffix, const int defaultVal) {
+            auto attributes = juce::AudioParameterIntAttributes().withAutomatable(true).withLabel(T::Name);
+            return std::make_unique<juce::AudioParameterInt>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
+                                                             T::Name + suffix, T::Min, T::Max, defaultVal, attributes);
+        }
+
+        static std::unique_ptr<juce::AudioParameterInt> get(const std::string& suffix, const bool meta,
+                                                             const bool automate) {
+            auto attributes = juce::AudioParameterIntAttributes().withAutomatable(automate).withLabel(T::Name).
+                                                                  withMeta(meta);
+            return std::make_unique<juce::AudioParameterInt>(juce::ParameterID(T::ID + suffix, VERSION_HINT),
+                                                             T::Name + suffix, T::Min, T::Max, T::DefaultV, attributes);
+        }
+
+        inline static float convertTo01(const int x) {
+            return static_cast<float>(x - T::Min) / static_cast<float>(T::Max - T::Min);
         }
     };
 
@@ -362,7 +396,26 @@ public:
     static constexpr auto DefaultV = false;
 };
 
-static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout(){
+class SaturationSplitFreq : public FloatParameters<SaturationSplitFreq> {
+public:
+    static constexpr auto ID = "s_sf";
+    static constexpr auto Name = "Sat Split Freq";
+    inline static const auto Range = getLogMidRange(20.f, 20000.f, 1000.f, 0.1f);
+    static constexpr auto DefaultV = 1000.f;
+};
+
+class NumSplits : public IntParameters<NumSplits> {
+public:
+    static constexpr auto ID = "nsplts";
+    static constexpr auto Name = "Number of active splits";
+    inline static const auto Min = 0;
+    inline static const auto Max = ParamDeclarations::SATURATION_MAX_SPLITS;
+    static constexpr auto DefaultV = 0;
+};
+
+
+
+static inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout(){
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     layout.add(
     EQFreq0::get(true),EQFreq1::get(true),EQFreq2::get(true),
@@ -377,14 +430,20 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                    EQGain::get(suffix),
                    EQBypass::get(suffix));
         }
-    for(size_t i=0; i< SATURATION_NUM_BANDS; i++)
+    for(size_t i=0; i< SATURATION_MAX_SPLITS + 1; i++)
     {
         const auto suffix = std::to_string(i);
         layout.add(
                    SaturationPreGain::get(suffix),
-                   SaturationBypass::get(suffix)
-                   );
+                   SaturationBypass::get(suffix));
     }
+    for(size_t i=0; i < SATURATION_MAX_SPLITS; i++)
+    {
+        const auto suffix = std::to_string(i);
+        layout.add(SaturationSplitFreq::get(suffix, SATURATION_DEFAULT_SPLIT_FREQS[i]));
+    }
+    layout.add(NumSplits::get());
+    
     return layout;
 };
 
