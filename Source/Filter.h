@@ -92,6 +92,8 @@ public:
         strategy = s;
     }
     
+    void prepareToPlay(juce::dsp::ProcessSpec spec);
+    
     void resetDelayLines();
     
     void putSample(float sample,int channel);

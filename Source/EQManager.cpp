@@ -28,9 +28,13 @@ void EQManager::update()
     }
 }
 
-void EQManager::prepareToPlay(juce::dsp::ProcessSpec)
+void EQManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     updateFilters(eqParams.size(),spec);
+    for(auto& filter : filters)
+    {
+        filter.prepareToPlay(spec);
+    }
 }
 
 void EQManager::updateFilters(size_t numBands, juce::dsp::ProcessSpec spec)

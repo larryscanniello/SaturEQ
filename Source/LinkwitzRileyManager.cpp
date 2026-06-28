@@ -20,8 +20,6 @@ const int NUM_STAGES = 2;
 void LinkwitzRileyManager::deriveFiltersFromFrequencies()
 {
     for(int i=0; i<params.getNumSplits(); i++){
-        LowPass lpStrategy;
-        HighPass hpStrategy;
         float fc = params.getFreqToSplitAt(i);
         std::pair<Filter,Filter> pair = filters[i];
         pair.first.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
@@ -34,6 +32,11 @@ void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     deriveFiltersFromFrequencies();
     bands.resize(params.size(),spec);
+    for(auto& pair : filters)
+    {
+        pair.first.prepareToPlay(spec);
+        pair.second.prepareToPlay(spec);
+    }
 }
 
 

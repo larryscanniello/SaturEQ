@@ -15,13 +15,13 @@
 
 void Saturator::update()
 {
-    params.preGainSmoother->setTargetValue(params.preGain->get());
+    params.preGainSmoother.setTargetValue(params.preGain->get());
     bypass = params.bypass;
 }
 
 void Saturator::smoothen()
 {
-    preGain = params.preGainSmoother->getNextValue();
+    preGain = params.preGainSmoother.getNextValue();
 }
 
 void Saturator::processBlock(juce::dsp::AudioBlock<float> &input)

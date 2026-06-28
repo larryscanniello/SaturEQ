@@ -70,7 +70,7 @@ Parameters::Parameters(juce::AudioProcessorValueTreeState &apvts) : eqParams(apv
 }
 
 
-void Parameters::prepareToPlay(juce::dsp::processSpec spec) noexcept
+void Parameters::prepareToPlay(juce::dsp::ProcessSpec spec) noexcept
 {
     double duration = 0.02f;
     
@@ -78,14 +78,14 @@ void Parameters::prepareToPlay(juce::dsp::processSpec spec) noexcept
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
         EQ::Band band = eqParams.getParamsForBand(i);
-        band.fcSmoother->reset(sampleRate,duration);
-        band.QSmoother->reset(sampleRate, duration);
-        band.gainInDBSmoother->reset(sampleRate, duration);
+        band.fcSmoother.reset(sampleRate,duration);
+        band.QSmoother.reset(sampleRate, duration);
+        band.gainInDBSmoother.reset(sampleRate, duration);
     }
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1; i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
-        band.preGainSmoother->reset(sampleRate,duration);
+        band.preGainSmoother.reset(sampleRate,duration);
     }
 }
 
@@ -95,15 +95,15 @@ void Parameters::reset() noexcept
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
         EQ::Band band = eqParams.getParamsForBand(i);
-        band.fcSmoother->setCurrentAndTargetValue(band.fc->get());
-        band.QSmoother->setCurrentAndTargetValue(band.Q->get());
-        band.gainInDBSmoother->setCurrentAndTargetValue(band.gainInDB->get());
+        band.fcSmoother.setCurrentAndTargetValue(band.fc->get());
+        band.QSmoother.setCurrentAndTargetValue(band.Q->get());
+        band.gainInDBSmoother.setCurrentAndTargetValue(band.gainInDB->get());
     }
     
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1;i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
-        band.preGainSmoother->setCurrentAndTargetValue(band.preGain->get());
+        band.preGainSmoother.setCurrentAndTargetValue(band.preGain->get());
     }
 }
 
@@ -112,15 +112,15 @@ void Parameters::update() noexcept
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
         EQ::Band band = eqParams.getParamsForBand(i);
-        band.fcSmoother->setTargetValue(band.fc->get());
-        band.QSmoother->setTargetValue(band.Q->get());
-        band.gainInDBSmoother->setTargetValue(band.gainInDB->get());
+        band.fcSmoother.setTargetValue(band.fc->get());
+        band.QSmoother.setTargetValue(band.Q->get());
+        band.gainInDBSmoother.setTargetValue(band.gainInDB->get());
     }
     
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1;i++)
     {
         Saturation::Band band = saturationParams.getParamsForBand(i);
-        band.preGainSmoother->setTargetValue(band.preGain->get());
+        band.preGainSmoother.setTargetValue(band.preGain->get());
     }
  }
  

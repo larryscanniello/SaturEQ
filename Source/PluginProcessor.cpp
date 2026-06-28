@@ -103,12 +103,15 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    params.prepareToPlay();
-    params.reset();
     
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = static_cast<uint32_t>(getTotalNumInputChannels());
+    
+    params.prepareToPlay(spec);
+    params.reset();
+    
+    
     
     eqManager.prepareToPlay(spec);
     saturationManager.prepareToPlay(spec);

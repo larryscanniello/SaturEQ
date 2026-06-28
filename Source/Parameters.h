@@ -25,9 +25,9 @@ public:
             juce::AudioParameterFloat* Q;
             juce::AudioParameterBool* bypass;
             
-            juce::SmoothedValue<float,juce::ValueSmoothingTypes::Multiplicative>* fcSmoother;
-            juce::LinearSmoothedValue<float>* gainInDBSmoother;
-            juce::SmoothedValue<float,juce::ValueSmoothingTypes::Multiplicative>* QSmoother;
+            juce::SmoothedValue<float,juce::ValueSmoothingTypes::Multiplicative> fcSmoother;
+            juce::LinearSmoothedValue<float> gainInDBSmoother;
+            juce::SmoothedValue<float,juce::ValueSmoothingTypes::Multiplicative> QSmoother;
         };
         
         Band getParamsForBand(size_t bandNum)
@@ -57,7 +57,7 @@ public:
             juce::AudioParameterBool* bypass;
             juce::AudioParameterFloat* preGain;
             
-            juce::LinearSmoothedValue<float>* preGainSmoother;
+            juce::LinearSmoothedValue<float> preGainSmoother;
         };
         
         
@@ -106,7 +106,7 @@ public:
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
-    void prepareToPlay() noexcept;
+    void prepareToPlay(juce::dsp::ProcessSpec spec) noexcept;
     void reset() noexcept;
     void update() noexcept;
     void setDefaults() noexcept;
