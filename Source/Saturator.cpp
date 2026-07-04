@@ -28,6 +28,8 @@ void Saturator::processBlock(juce::dsp::AudioBlock<float> &input)
 {
     if(bypass) return;
     
+    update();
+    
     for(size_t channel=0; channel<input.getNumChannels(); channel++)
     {
         auto* channelPtr = input.getChannelPointer(channel);

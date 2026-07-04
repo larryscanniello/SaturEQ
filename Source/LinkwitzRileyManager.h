@@ -19,25 +19,11 @@
 class LinkwitzRileyManager {
     
 public:
-    LinkwitzRileyManager(Parameters::Saturation& params)
-    : params(params)
-    {
-        for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1; i++)
-        {
-            //Initialize with placeholder values, will be updated on prepareToPlay
-            LowPass lp;
-            HighPass hp;
-            Filter lpf{0,0,0,lp};
-            Filter hpf{0,0,0,hp};
-            std::pair<Filter,Filter> pair{lpf,hpf};
-            filters.emplace_back(pair);
-        }
-        deriveFiltersFromFrequencies();
-    }
+    LinkwitzRileyManager(Parameters::Saturation& params);
     
     const std::vector<juce::dsp::AudioBlock<float>> splitSignal(juce::dsp::AudioBlock<float> &input);
     
-    juce::dsp::AudioBlock<float> sumSignal(juce::dsp::AudioBlock<float> &output);
+    juce::dsp::AudioBlock<float> sumSignal();
     
     void prepareToPlay(juce::dsp::ProcessSpec spec);
     
@@ -54,23 +40,17 @@ private:
         One Band represents a buffer for a saturation band
      */
     struct Band{
-        Band(size_t numChannels,size_t numSamples)
+        void prepareToPlay(juce::dsp::ProcessSpec spec)
         {
-            buffer.setSize((int) numChannels,(int) numSamples);
+            buffer.setSize(spec.numChannels,spec.maximumBlockSize);
         }
-        
-        void prepare(size_t numChannels,size_t numSamples)
+        juce::dsp::AudioBlock<float> getBlock()
         {
-            buffer.setSize((int) numChannels,(int) numSamples);
-        }
-        
-        juce::dsp::AudioBlock<float> getSamples(int numSamples)
-        {
-            return juce::dsp::AudioBlock<float> (buffer).getSubBlock(0, numSamples);
+            juce::dsp::AudioBlock<float> block{buffer};
+            return block;
         }
     
         juce::AudioBuffer<float> buffer;
-        juce::dsp::AudioBlock<float> block;
     };
     
     /*
@@ -79,30 +59,14 @@ private:
         The split method in this class needs to return a vector of AudioBlocks, which need to be preallocated
     */
     struct Bands{
-        Bands() = default;
-        
-        Bands(size_t numBands,juce::dsp::ProcessSpec spec)
+        Bands()
         {
-            for(auto i=0; i<numBands; i++)
+            for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS+1; i++)
             {
-                ptrs.emplace_back(std::make_unique<Band>(spec.numChannels,spec.maximumBlockSize));
+                ptrs.emplace_back(std::make_unique<Band>());
             }
         }
-        void resize(size_t numBands,juce::dsp::ProcessSpec spec)
-        {
-            ptrs.clear();
-            for (auto i = 0; i<numBands; i++)
-                  ptrs.emplace_back(std::make_unique<Band>(spec.numChannels,spec.maximumBlockSize));
-            blocks.clear();
-            for(auto i=0; i<numBands;i++)
-            {
-                juce::dsp::AudioBlock<float> block{ptrs[i]->buffer};
-                blocks.emplace_back(block);
-            }
-            
-        }
-        
-        juce::dsp::AudioBlock<float> getBlock(size_t blockNum)
+        juce::dsp::AudioBlock<float>& getBlock(size_t blockNum)
         {
             return blocks[blockNum];
         }
@@ -110,6 +74,14 @@ private:
         {
             return blocks.size();
         }
+        void prepareToPlay(juce::dsp::ProcessSpec spec)
+          {
+              for (auto& ptr : ptrs)
+                  ptr->prepareToPlay(spec);
+              blocks.clear();
+              for (auto& ptr : ptrs)
+                  blocks.emplace_back(juce::dsp::AudioBlock<float>{ptr->buffer});
+          }
         const std::vector<juce::dsp::AudioBlock<float>> getBlocks()
         {
             return blocks;

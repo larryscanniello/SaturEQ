@@ -30,9 +30,9 @@ public:
         return lrManager.splitSignal(input);
     }
     
-    juce::dsp::AudioBlock<float> sumSignal(juce::dsp::AudioBlock<float> &output)
+    juce::dsp::AudioBlock<float> sumSignal()
     {
-        return lrManager.sumSignal(output);
+        return lrManager.sumSignal();
     }
     
     void addSplit(float freq);

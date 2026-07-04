@@ -22,8 +22,6 @@ public:
     
     bool bypass;
     
-    float preGain;
-    
     void update();
     
     void smoothen();
@@ -33,5 +31,5 @@ public:
 private:
     Parameters::Saturation::Band params;
     
-    
+    float preGain;
 };

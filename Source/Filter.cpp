@@ -15,7 +15,6 @@
 void Filter::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     juce::uint32 numChannels = spec.numChannels;
-    juce::uint32 blockSize = spec.maximumBlockSize;
     x.resize(numChannels);
     y.resize(numChannels);
     for(auto i=0; i<numChannels; i++)
@@ -67,8 +66,12 @@ void Filter::putSample(float sample,int channel){
 
 void Filter::processBlock(juce::dsp::AudioBlock<float>& input, juce::dsp::AudioBlock<float>& output)
 {
+    jassert(input.getNumChannels() == output.getNumChannels());
+    jassert(input.getNumSamples() == output.getNumSamples());
+    
     for(auto channel=0; channel<output.getNumChannels(); channel++)
     {
+        
         auto inputData = input.getChannelPointer(channel);
         auto outputData = output.getChannelPointer(channel);
         for(auto sample=0; sample<input.getNumSamples();sample++)

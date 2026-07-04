@@ -104,17 +104,22 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     
-    spec.sampleRate = sampleRate;
-    spec.maximumBlockSize = samplesPerBlock;
-    spec.numChannels = static_cast<uint32_t>(getTotalNumInputChannels());
+    downsampledSpec.sampleRate = sampleRate;
+    downsampledSpec.maximumBlockSize = samplesPerBlock;
+    downsampledSpec.numChannels = static_cast<uint32_t>(getTotalNumInputChannels());
     
-    params.prepareToPlay(spec);
+    size_t multiplicativeFactor = std::pow(2,OVERSAMPLING_FACTOR);
+    upsampledSpec.sampleRate = sampleRate * multiplicativeFactor;
+    upsampledSpec.maximumBlockSize = samplesPerBlock * (juce::uint32) multiplicativeFactor;
+    upsampledSpec.numChannels = downsampledSpec.numChannels;
+    
+    params.prepareToPlay(upsampledSpec);
     params.reset();
     
     
     
-    eqManager.prepareToPlay(spec);
-    saturationManager.prepareToPlay(spec);
+    eqManager.prepareToPlay(upsampledSpec);
+    saturationManager.prepareToPlay(upsampledSpec);
     
     oversampler.initProcessing(samplesPerBlock);
     
@@ -164,17 +169,17 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    upsampled = oversampler.processSamplesUp(buffer);
+    juce::dsp::AudioBlock<float> bufferblock = juce::dsp::AudioBlock<float>(buffer);
+    
+    upsampled = oversampler.processSamplesUp(bufferblock);
     
     bandblocks = saturationManager.splitSignal(upsampled);
     
     saturationManager.processBands(bandblocks);
     
-    juce::dsp::AudioBlock<float> summed = saturationManager.sumSignal(upsampled);
+    juce::dsp::AudioBlock<float> summed = saturationManager.sumSignal();
     
     eqManager.processBlock(summed);
-    
-    juce::dsp::AudioBlock<float> bufferblock = juce::dsp::AudioBlock<float>(buffer);
     
     oversampler.processSamplesDown(bufferblock);
     

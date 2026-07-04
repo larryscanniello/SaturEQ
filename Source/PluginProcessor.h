@@ -19,6 +19,7 @@
 /**
 */
 
+constexpr size_t OVERSAMPLING_FACTOR = 1;
 
 class SaturEQAudioProcessor  : public juce::AudioProcessor
 {
@@ -64,7 +65,8 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
         *this, nullptr, "Parameters", ParamDeclarations::createParameterLayout()
     };
     
-    juce::dsp::ProcessSpec spec;
+    juce::dsp::ProcessSpec downsampledSpec;
+    juce::dsp::ProcessSpec upsampledSpec;
     
     Parameters params;
     
@@ -74,8 +76,8 @@ class SaturEQAudioProcessor  : public juce::AudioProcessor
     
     EQManager eqManager;
     
-    juce::dsp::Oversampling<float> oversampler{ (size_t) 2, 1, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
-    
+    juce::dsp::Oversampling<float> oversampler{ (size_t) 2, OVERSAMPLING_FACTOR, juce::dsp::Oversampling<float>::FilterType::filterHalfBandFIREquiripple, false, true};
+        
     juce::dsp::AudioBlock<float> upsampled;
     
     std::vector<juce::dsp::AudioBlock<float>> bandblocks;

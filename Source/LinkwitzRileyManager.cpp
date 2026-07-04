@@ -14,7 +14,22 @@
 #include "LowPass.h"
 #include <vector>
 
-const int NUM_STAGES = 2;
+
+LinkwitzRileyManager::LinkwitzRileyManager(Parameters::Saturation& params)
+: params(params)
+{
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS; i++)
+    {
+        //Initialize with placeholder values, will be updated on prepareToPlay
+        HighPass hp;
+        LowPass lp;
+        Filter hpf{0,0,0,hp};
+        Filter lpf{0,0,0,lp};
+        std::pair<Filter,Filter> pair{hpf,lpf};
+        filters.emplace_back(pair);
+    }
+    deriveFiltersFromFrequencies();
+}
 
 
 void LinkwitzRileyManager::deriveFiltersFromFrequencies()
@@ -31,7 +46,7 @@ void LinkwitzRileyManager::deriveFiltersFromFrequencies()
 void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     deriveFiltersFromFrequencies();
-    bands.resize(params.size(),spec);
+    bands.prepareToPlay(spec);
     for(auto& pair : filters)
     {
         pair.first.prepareToPlay(spec);
@@ -41,11 +56,8 @@ void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 
 
 
-juce::dsp::AudioBlock<float> LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlock<float> &output)
+juce::dsp::AudioBlock<float> LinkwitzRileyManager::sumSignal()
 {
-    
-    output.clear();
-    
     for(auto i=1; i<bands.size(); i++)
     {
         juce::dsp::AudioBlock<float> block = bands.getBlock(i);
@@ -58,24 +70,23 @@ juce::dsp::AudioBlock<float> LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlo
 
 const std::vector<juce::dsp::AudioBlock<float>> LinkwitzRileyManager::splitSignal(juce::dsp::AudioBlock<float> &input)
 {
-    
-    if(filters.size()==0)
+    if(params.getNumSplits()==0)
     {
         juce::dsp::AudioBlock<float> internalBand{bands.getBlock(0)};
         internalBand.copyFrom(input);
         return bands.getBlocks();
     };
 
-    filters[0].first.processBlock(input, bands.getPointers()[0]->block);
+    filters[0].first.processBlock(input, bands.getBlock(0));
     
-    auto n = filters.size();
+    auto n = params.getNumSplits();
     
     for(int i=0; i<n-1;i++){
-        filters[i].second.processBlock(input, bands.getPointers()[i+1]->block);
-        filters[i+1].first.processBlock(bands.getPointers()[i+1]->block, bands.getPointers()[i+1]->block);
+        filters[i].second.processBlock(input, bands.getBlock(i+1));
+        filters[i+1].first.processBlock(bands.getBlock(i+1), bands.getBlock(i+1));
     }
     
-    filters[n-1].second.processBlock(input, bands.getPointers()[n-1]->block);
+    filters[n-1].second.processBlock(input, bands.getBlock(n-1));
     
     return bands.getBlocks();
 }

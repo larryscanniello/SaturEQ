@@ -410,7 +410,7 @@ public:
     static constexpr auto Name = "Number of active splits";
     inline static const auto Min = 0;
     inline static const auto Max = ParamDeclarations::SATURATION_MAX_SPLITS;
-    static constexpr auto DefaultV = 0;
+    static constexpr auto DefaultV = 3;
 };
 
 
