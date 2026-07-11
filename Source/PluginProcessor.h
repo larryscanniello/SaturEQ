@@ -9,10 +9,10 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Parameters.h"
-#include "Filter.h"
-#include "SaturationManager.h"
-#include "EQManager.h"
+#include "Parameters/Parameters.h"
+#include "DSP/Filters/Filter.h"
+#include "Managers/SaturationManager.h"
+#include "Managers/EQManager.h"
 #include <vector>
 
 //==============================================================================

@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include <juce_dsp/juce_dsp.h>
-#include "Parameters.h"
+#include "../Parameters/Parameters.h"
 
 class Saturator {
 

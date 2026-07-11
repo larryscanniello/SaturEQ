@@ -8,11 +8,11 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Filter.h"
-#include "Saturator.h"
-#include "ParamDeclarations.h"
-#include "Peaking.h"
-#include "Parameters.h"
+#include "DSP/Filters/Filter.h"
+#include "DSP/Saturator.h"
+#include "Parameters/ParamDeclarations.h"
+#include "DSP/Filters/Peaking.h"
+#include "Parameters/Parameters.h"
 #include <cmath>
 
 //==============================================================================

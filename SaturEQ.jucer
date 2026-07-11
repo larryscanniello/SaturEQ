@@ -5,33 +5,33 @@
   <MAINGROUP id="ELcmCp" name="SaturEQ">
     <GROUP id="{8C664CA7-3129-E695-549D-643058833E5B}" name="Source">
       <GROUP id="{C89E0404-F5CC-A891-37B0-8044A363AF38}" name="Managers">
-        <FILE id="h5sz0u" name="EQManager.cpp" compile="1" resource="0" file="Source/EQManager.cpp"/>
-        <FILE id="qM7im6" name="EQManager.h" compile="0" resource="0" file="Source/EQManager.h"/>
+        <FILE id="h5sz0u" name="EQManager.cpp" compile="1" resource="0" file="Source/Managers/EQManager.cpp"/>
+        <FILE id="qM7im6" name="EQManager.h" compile="0" resource="0" file="Source/Managers/EQManager.h"/>
         <FILE id="vqg1Wm" name="LinkwitzRileyManager.cpp" compile="1" resource="0"
-              file="Source/LinkwitzRileyManager.cpp"/>
+              file="Source/Managers/LinkwitzRileyManager.cpp"/>
         <FILE id="XyOjVE" name="LinkwitzRileyManager.h" compile="0" resource="0"
-              file="Source/LinkwitzRileyManager.h"/>
+              file="Source/Managers/LinkwitzRileyManager.h"/>
         <FILE id="SxHrNe" name="SaturationManager.cpp" compile="1" resource="0"
-              file="Source/SaturationManager.cpp"/>
+              file="Source/Managers/SaturationManager.cpp"/>
         <FILE id="n3v6QC" name="SaturationManager.h" compile="0" resource="0"
-              file="Source/SaturationManager.h"/>
+              file="Source/Managers/SaturationManager.h"/>
       </GROUP>
       <GROUP id="{6ACF383A-CD29-316F-9991-77DAD2FF1154}" name="Parameters">
-        <FILE id="pEqW8A" name="Parameters.cpp" compile="1" resource="0" file="Source/Parameters.cpp"/>
-        <FILE id="LORqbQ" name="Parameters.h" compile="0" resource="0" file="Source/Parameters.h"/>
+        <FILE id="pEqW8A" name="Parameters.cpp" compile="1" resource="0" file="Source/Parameters/Parameters.cpp"/>
+        <FILE id="LORqbQ" name="Parameters.h" compile="0" resource="0" file="Source/Parameters/Parameters.h"/>
         <FILE id="dOq8T5" name="ParamDeclarations.h" compile="0" resource="0"
-              file="Source/ParamDeclarations.h"/>
+              file="Source/Parameters/ParamDeclarations.h"/>
       </GROUP>
       <GROUP id="{2E338707-AB2A-C0BC-5481-53024A720707}" name="DSP">
+        <FILE id="sgrNut" name="Saturator.h" compile="0" resource="0" file="Source/DSP/Saturator.h"/>
+        <FILE id="Vgj8uG" name="Saturator.cpp" compile="1" resource="0" file="Source/DSP/Saturator.cpp"/>
         <GROUP id="{F78AB606-3706-265B-9B8A-0E57D6B65D2E}" name="Filters">
-          <FILE id="L78GgV" name="HighPass.h" compile="0" resource="0" file="Source/HighPass.h"/>
-          <FILE id="XgDiBZ" name="LowPass.h" compile="0" resource="0" file="Source/LowPass.h"/>
-          <FILE id="EXOYl0" name="Peaking.h" compile="0" resource="0" file="Source/Peaking.h"/>
-          <FILE id="YMwjqk" name="Filter.h" compile="0" resource="0" file="Source/Filter.h"/>
-          <FILE id="JLKr1A" name="Filter.cpp" compile="1" resource="0" file="Source/Filter.cpp"/>
+          <FILE id="dvbhO0" name="Peaking.h" compile="0" resource="0" file="Source/DSP/Filters/Peaking.h"/>
+          <FILE id="xoGubb" name="Filter.h" compile="0" resource="0" file="Source/DSP/Filters/Filter.h"/>
+          <FILE id="RXJFBC" name="Filter.cpp" compile="1" resource="0" file="Source/DSP/Filters/Filter.cpp"/>
+          <FILE id="AQAWKv" name="LowPass.h" compile="0" resource="0" file="Source/DSP/Filters/LowPass.h"/>
+          <FILE id="TXa5UN" name="HighPass.h" compile="0" resource="0" file="Source/DSP/Filters/HighPass.h"/>
         </GROUP>
-        <FILE id="JxybND" name="Saturator.cpp" compile="1" resource="0" file="Source/Saturator.cpp"/>
-        <FILE id="tzIUWN" name="Saturator.h" compile="0" resource="0" file="Source/Saturator.h"/>
       </GROUP>
       <FILE id="g8HbOR" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

@@ -11,7 +11,7 @@
 #pragma once
 #include <vector>
 #include <JuceHeader.h>
-#include "Parameters.h"
+#include "../../Parameters/Parameters.h"
 #include "HighPass.h"
 #include "LowPass.h"
 #include "Peaking.h"
