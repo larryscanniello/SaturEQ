@@ -40,22 +40,15 @@ void EQManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 void EQManager::updateFilters(size_t numBands, juce::dsp::ProcessSpec spec)
 {
     jassert(numBands >= 2);
-        
     filters.clear();
-    
     filters.reserve(numBands);
-    
     HighPass hpStrategy;
-    
     filters.emplace_back(eqParams.getParamsForBand(0),hpStrategy);
-    
     for(auto i=1; i<filters.size()-1; i++)
     {
         Peaking peakingStrategy;
         filters.emplace_back(eqParams.getParamsForBand(i),peakingStrategy);
     }
-    
     LowPass lpStrategy;
-    
     filters.emplace_back(eqParams.getParamsForBand(filters.size()-1),lpStrategy);
 }
