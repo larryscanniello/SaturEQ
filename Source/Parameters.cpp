@@ -77,14 +77,14 @@ void Parameters::prepareToPlay(juce::dsp::ProcessSpec spec) noexcept
     double sampleRate = spec.sampleRate;
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        EQ::Band band = eqParams.getParamsForBand(i);
+        EQ::Band& band = eqParams.getParamsForBand(i);
         band.fcSmoother.reset(sampleRate,duration);
         band.QSmoother.reset(sampleRate, duration);
         band.gainInDBSmoother.reset(sampleRate, duration);
     }
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1; i++)
     {
-        Saturation::Band band = saturationParams.getParamsForBand(i);
+        Saturation::Band& band = saturationParams.getParamsForBand(i);
         band.preGainSmoother.reset(sampleRate,duration);
     }
 }
@@ -94,7 +94,7 @@ void Parameters::reset() noexcept
 {
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        EQ::Band band = eqParams.getParamsForBand(i);
+        EQ::Band& band = eqParams.getParamsForBand(i);
         band.fcSmoother.setCurrentAndTargetValue(band.fc->get());
         band.QSmoother.setCurrentAndTargetValue(band.Q->get());
         band.gainInDBSmoother.setCurrentAndTargetValue(band.gainInDB->get());
@@ -102,7 +102,7 @@ void Parameters::reset() noexcept
     
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1;i++)
     {
-        Saturation::Band band = saturationParams.getParamsForBand(i);
+        Saturation::Band& band = saturationParams.getParamsForBand(i);
         band.preGainSmoother.setCurrentAndTargetValue(band.preGain->get());
     }
 }
@@ -111,7 +111,7 @@ void Parameters::update() noexcept
 {
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        EQ::Band band = eqParams.getParamsForBand(i);
+        EQ::Band& band = eqParams.getParamsForBand(i);
         band.fcSmoother.setTargetValue(band.fc->get());
         band.QSmoother.setTargetValue(band.Q->get());
         band.gainInDBSmoother.setTargetValue(band.gainInDB->get());
@@ -119,7 +119,7 @@ void Parameters::update() noexcept
     
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS + 1;i++)
     {
-        Saturation::Band band = saturationParams.getParamsForBand(i);
+        Saturation::Band& band = saturationParams.getParamsForBand(i);
         band.preGainSmoother.setTargetValue(band.preGain->get());
     }
  }

@@ -14,6 +14,7 @@
 
 void Filter::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
+    this->spec = spec;
     juce::uint32 numChannels = spec.numChannels;
     x.resize(numChannels);
     y.resize(numChannels);
@@ -24,6 +25,7 @@ void Filter::prepareToPlay(juce::dsp::ProcessSpec spec)
             y[i].resize(s.bSize);
         },strategy);
     }
+    resetDelayLines();
 }
 
 void Filter::update()
@@ -48,26 +50,28 @@ void Filter::smoothen()
 }
 
 void Filter::putSample(float sample,int channel){
-    std::vector<float>& xChannel = x[channel];
-    std::vector<float>& yChannel = y[channel];
-    curr = (curr + 1) % x.size();
-    xChannel[curr] = sample;
-    float processedSample = 0;
-    
-    for(int i=0; i<a.size();i++){
-        processedSample -= a[i] * xChannel[(curr-i+a.size()) % a.size()];
-    }
-    
-    for(int i=0; i<b.size();i++){
-        processedSample += b[i] * yChannel[(curr-i+b.size()) % b.size()];
-    }
-    yChannel[curr] = sample;
-}
+      std::vector<float>& xChannel = x[channel];
+      std::vector<float>& yChannel = y[channel];
+      curr = (curr + 1) % xChannel.size();
+      xChannel[curr] = sample;
+      float processedSample = 0;
+      for(int i=0; i<b.size();i++){
+          processedSample += b[i] * xChannel[(curr-i+xChannel.size()) % xChannel.size()];
+      }
+      for(int i=1; i<a.size();i++){
+          processedSample -= a[i] * yChannel[(curr-i+yChannel.size()) % yChannel.size()];
+      }
+      processedSample /= a[0];
+      yChannel[curr] = processedSample;
+  }
 
-void Filter::processBlock(juce::dsp::AudioBlock<float>& input, juce::dsp::AudioBlock<float>& output)
+
+void Filter::processBlock(juce::dsp::AudioBlock<float> input, juce::dsp::AudioBlock<float> output)
 {
     jassert(input.getNumChannels() == output.getNumChannels());
     jassert(input.getNumSamples() == output.getNumSamples());
+    
+    if(useParams) update();
     
     for(auto channel=0; channel<output.getNumChannels(); channel++)
     {
@@ -76,21 +80,23 @@ void Filter::processBlock(juce::dsp::AudioBlock<float>& input, juce::dsp::AudioB
         auto outputData = output.getChannelPointer(channel);
         for(auto sample=0; sample<input.getNumSamples();sample++)
         {
-            smoothen();
+            if(useParams) smoothen();
             putSample(inputData[sample], channel);
             outputData[sample] = getSample(channel);
         }
     }
 }
 
-void Filter::processBlock(juce::dsp::AudioBlock<float> &buf)
+void Filter::processBlock(juce::dsp::AudioBlock<float> buf)
 {
+    if(useParams) update();
+    
     for(auto channel=0; channel<buf.getNumChannels();channel++)
     {
         auto channelData = buf.getChannelPointer(channel);
         for(auto sample=0; sample<buf.getNumSamples();sample++)
         {
-            smoothen();
+            if(useParams) smoothen();
             putSample(channelData[sample], channel);
             channelData[sample] = getSample(channel);
         }

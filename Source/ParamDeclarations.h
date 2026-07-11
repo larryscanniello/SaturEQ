@@ -376,8 +376,8 @@ class EQQ5 : public FloatParameters<EQQ5> {
 
 class EQBypass : public BoolParameters<EQBypass> {
 public:
-    static constexpr auto ID = "dynamic_bypass";
-    static constexpr auto Name = "Dynamic Bypass";
+    static constexpr auto ID = "eqbp";
+    static constexpr auto Name = "EQ Bypass";
     static constexpr auto DefaultV = false;
 };
 
@@ -385,14 +385,14 @@ class SaturationPreGain : public FloatParameters<SaturationPreGain> {
     public:
         static constexpr auto ID = "s_pg";
         static constexpr auto Name = "Saturation Pre Gain";
-        inline static const auto Range = getLogMidRange(0.025f, 25.f, 0.707f, 0.001f);
-        static constexpr auto DefaultV = 0.707f;
+        inline static const auto Range = getLogMidRange(0.025f, 25.f, 1.0f, 0.001f);
+        static constexpr auto DefaultV = 1.0f;
 };
 
 class SaturationBypass : public BoolParameters<SaturationBypass> {
 public:
     static constexpr auto ID = "s_bp";
-    static constexpr auto Name = "Dynamic Bypass";
+    static constexpr auto Name = "Saturation Band Bypass";
     static constexpr auto DefaultV = false;
 };
 

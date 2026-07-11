@@ -20,8 +20,6 @@ public:
     
     void processBlock(juce::dsp::AudioBlock<float>& input);
     
-    bool bypass;
-    
     void update();
     
     void smoothen();
@@ -32,4 +30,6 @@ private:
     Parameters::Saturation::Band params;
     
     float preGain;
+    
+    bool bypass;
 };

@@ -21,14 +21,18 @@ class LinkwitzRileyManager {
 public:
     LinkwitzRileyManager(Parameters::Saturation& params);
     
-    const std::vector<juce::dsp::AudioBlock<float>> splitSignal(juce::dsp::AudioBlock<float> &input);
+    const std::vector<juce::dsp::AudioBlock<float>>& splitSignal(juce::dsp::AudioBlock<float> &input);
     
-    juce::dsp::AudioBlock<float> sumSignal();
+    void sumSignal(juce::dsp::AudioBlock<float>& output);
     
     void prepareToPlay(juce::dsp::ProcessSpec spec);
     
     void deriveFiltersFromFrequencies();
     
+    void update()
+    {
+        deriveFiltersFromFrequencies();
+    }
 private:
     
     Parameters::Saturation& params;
@@ -43,6 +47,7 @@ private:
         void prepareToPlay(juce::dsp::ProcessSpec spec)
         {
             buffer.setSize(spec.numChannels,spec.maximumBlockSize);
+            buffer.clear();
         }
         juce::dsp::AudioBlock<float> getBlock()
         {
@@ -82,7 +87,7 @@ private:
               for (auto& ptr : ptrs)
                   blocks.emplace_back(juce::dsp::AudioBlock<float>{ptr->buffer});
           }
-        const std::vector<juce::dsp::AudioBlock<float>> getBlocks()
+        const std::vector<juce::dsp::AudioBlock<float>>& getBlocks()
         {
             return blocks;
         }

@@ -19,20 +19,20 @@ class SaturationManager {
 public:
     SaturationManager(Parameters::Saturation& params) : params(params), lrManager(params) {};
     
-    void processBands(std::vector<juce::dsp::AudioBlock<float>> blocks);
+    void processBands(std::vector<juce::dsp::AudioBlock<float>>& blocks);
     
     void update();
     
     void prepareToPlay(juce::dsp::ProcessSpec spec);
     
-    const std::vector<juce::dsp::AudioBlock<float>> splitSignal(juce::dsp::AudioBlock<float> &input)
+    const std::vector<juce::dsp::AudioBlock<float>>& splitSignal(juce::dsp::AudioBlock<float> &input)
     {
         return lrManager.splitSignal(input);
     }
     
-    juce::dsp::AudioBlock<float> sumSignal()
+    void sumSignal(juce::dsp::AudioBlock<float> &output)
     {
-        return lrManager.sumSignal();
+        lrManager.sumSignal(output);
     }
     
     void addSplit(float freq);

@@ -33,8 +33,6 @@ protected:
     std::vector<float> a;
     std::vector<float> b;
     
-    size_t sampleRate;
-    
     Parameters::EQ::Band params;
     
     CoefficientStrategy strategy;
@@ -45,6 +43,8 @@ protected:
     
     juce::dsp::ProcessSpec spec;
     
+    bool useParams;
+    
 public:
     virtual ~Filter() = default;
     
@@ -53,13 +53,13 @@ public:
     void updateCoefficients(float fc, float Q, float gainInDB)
     {
         std::visit([&](auto& s) {
-              s.updateCoefficients(sampleRate, fc, Q, gainInDB, a, b);
+              s.updateCoefficients(spec.sampleRate, fc, Q, gainInDB, a, b);
           }, strategy);
     }
 
     Filter(Parameters::EQ::Band p,
            CoefficientStrategy strategy)
-    :  params(p), strategy(strategy)
+    :  params(p), strategy(strategy), useParams(true)
     {
         std::visit([&](auto& s) {
             a.resize(s.aSize);
@@ -67,7 +67,7 @@ public:
         },strategy);
         
         std::visit([&](auto& s) {
-              s.updateCoefficients(sampleRate, *p.fc, *p.Q, *p.gainInDB, a, b);
+              s.updateCoefficients(spec.sampleRate, *p.fc, *p.Q, *p.gainInDB, a, b);
           }, strategy);
     }
     
@@ -75,7 +75,7 @@ public:
            float Q,
            float gainInDB,
            CoefficientStrategy strategy)
-    : strategy(strategy)
+    : strategy(strategy), useParams(false)
     {
         std::visit([&](auto& s) {
             a.resize(s.aSize);
@@ -85,6 +85,8 @@ public:
         std::visit([&](auto& s) {
             s.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
         },strategy);
+        
+        
     }
     
     void setCoefficientStrategy(CoefficientStrategy s)
@@ -98,6 +100,6 @@ public:
     
     void putSample(float sample,int channel);
     float getSample(int channel) {return y[channel][curr];};
-    void processBlock(juce::dsp::AudioBlock<float> &input, juce::dsp::AudioBlock<float> &output);
-    void processBlock(juce::dsp::AudioBlock<float> &buf);
+    void processBlock(juce::dsp::AudioBlock<float> input, juce::dsp::AudioBlock<float> output);
+    void processBlock(juce::dsp::AudioBlock<float> buf);
 };

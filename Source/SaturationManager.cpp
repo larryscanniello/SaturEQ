@@ -15,14 +15,14 @@
 
 void SaturationManager::update()
 {
-    lrManager.deriveFiltersFromFrequencies();
+    lrManager.update();
     for(auto &saturator : saturators)
     {
         saturator.update();
     }
 }
 
-void SaturationManager::processBands(std::vector<juce::dsp::AudioBlock<float>> blocks)
+void SaturationManager::processBands(std::vector<juce::dsp::AudioBlock<float>>& blocks)
 {
     jassert(saturators.size() == blocks.size());
     

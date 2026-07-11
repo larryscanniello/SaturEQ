@@ -116,8 +116,6 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     params.prepareToPlay(upsampledSpec);
     params.reset();
     
-    
-    
     eqManager.prepareToPlay(upsampledSpec);
     saturationManager.prepareToPlay(upsampledSpec);
     
@@ -160,6 +158,8 @@ bool SaturEQAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 
 void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[maybe_unused]] juce::MidiBuffer& midiMessages)
 {
+
+    
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -173,13 +173,15 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     upsampled = oversampler.processSamplesUp(bufferblock);
     
+    saturationManager.update();
+    
     bandblocks = saturationManager.splitSignal(upsampled);
     
     saturationManager.processBands(bandblocks);
     
-    juce::dsp::AudioBlock<float> summed = saturationManager.sumSignal();
+    saturationManager.sumSignal(upsampled);
     
-    eqManager.processBlock(summed);
+    //eqManager.processBlock(upsampled);
     
     oversampler.processSamplesDown(bufferblock);
     

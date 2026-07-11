@@ -30,7 +30,7 @@ public:
             juce::SmoothedValue<float,juce::ValueSmoothingTypes::Multiplicative> QSmoother;
         };
         
-        Band getParamsForBand(size_t bandNum)
+        Band& getParamsForBand(size_t bandNum)
         {
             return params[bandNum];
         };
@@ -64,7 +64,7 @@ public:
         
     
         
-        Band getParamsForBand(size_t bandNum)
+        Band& getParamsForBand(size_t bandNum)
         {
             return params[bandNum];
         }
