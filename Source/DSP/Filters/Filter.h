@@ -28,26 +28,30 @@ protected:
     std::vector<std::vector<float>> x;
     std::vector<std::vector<float>> y;
     
-    int curr = 0;
+    std::vector<size_t> curr;
     
-    std::vector<float> a;
-    std::vector<float> b;
-    
-    Parameters::EQ::Band params;
+    Parameters::EQ::Band* params;
     
     CoefficientStrategy strategy;
     
     bool bypass;
     
     void smoothen();
+
+    bool useParams;
+    
+    std::vector<float> a;
+    std::vector<float> b;
+    
+    std::optional<float> fc;
+    std::optional<float> Q;
+    std::optional<float> gainInDB;
     
     juce::dsp::ProcessSpec spec;
     
-    bool useParams;
-    
 public:
     
-    Filter(Parameters::EQ::Band p,CoefficientStrategy strategy);
+    Filter(Parameters::EQ::Band& p,CoefficientStrategy strategy);
     
     Filter(float fc,float Q,float gainInDB,CoefficientStrategy strategy);
     
@@ -60,6 +64,9 @@ public:
         std::visit([&](auto& s) {
               s.updateCoefficients(spec.sampleRate, fc, Q, gainInDB, a, b);
           }, strategy);
+        this->fc = fc;
+        this->Q = Q;
+        this->gainInDB = gainInDB;
     }
     
     void setCoefficientStrategy(CoefficientStrategy s)
@@ -73,7 +80,7 @@ public:
     
     void putSample(float sample,int channel);
     
-    float getSample(int channel) {return y[channel][curr];};
+    float getSample(int channel) {return y[channel][curr[channel]];};
     
     void processBlock(juce::dsp::AudioBlock<float> input, juce::dsp::AudioBlock<float> output);
     

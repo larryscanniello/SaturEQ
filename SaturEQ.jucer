@@ -4,6 +4,12 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="ELcmCp" name="SaturEQ">
     <GROUP id="{8C664CA7-3129-E695-549D-643058833E5B}" name="Source">
+      <GROUP id="{6B21E40A-98F9-76FE-604A-EB8E3F3AC0E8}" name="UI">
+        <FILE id="QacrvU" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/UI/LookAndFeel.cpp"/>
+        <FILE id="HdMJhs" name="LookAndFeel.h" compile="0" resource="0" file="Source/UI/LookAndFeel.h"/>
+        <FILE id="rJI0PP" name="RotaryKnob.cpp" compile="1" resource="0" file="Source/UI/RotaryKnob.cpp"/>
+        <FILE id="VaFpkE" name="RotaryKnob.h" compile="0" resource="0" file="Source/UI/RotaryKnob.h"/>
+      </GROUP>
       <GROUP id="{C89E0404-F5CC-A891-37B0-8044A363AF38}" name="Managers">
         <FILE id="h5sz0u" name="EQManager.cpp" compile="1" resource="0" file="Source/Managers/EQManager.cpp"/>
         <FILE id="qM7im6" name="EQManager.h" compile="0" resource="0" file="Source/Managers/EQManager.h"/>

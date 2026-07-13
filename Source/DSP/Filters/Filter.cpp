@@ -11,8 +11,8 @@
 #include "Filter.h"
 #include <juce_dsp/juce_dsp.h>
 
-Filter::Filter(Parameters::EQ::Band p,CoefficientStrategy strategy)
-:  params(p), strategy(strategy), useParams(true)
+Filter::Filter(Parameters::EQ::Band& p,CoefficientStrategy strategy)
+:  params(&p), strategy(strategy), useParams(true), fc(std::nullopt), Q(std::nullopt), gainInDB(std::nullopt)
 {
     std::visit([&](auto& s) {
         a.resize(s.aSize);
@@ -28,7 +28,7 @@ Filter::Filter(float fc,
        float Q,
        float gainInDB,
        CoefficientStrategy strategy)
-: strategy(strategy), useParams(false)
+: params(nullptr), strategy(strategy), useParams(false), fc(fc), Q(Q), gainInDB(gainInDB)
 {
     std::visit([&](auto& s) {
         a.resize(s.aSize);
@@ -44,8 +44,20 @@ void Filter::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     this->spec = spec;
     juce::uint32 numChannels = spec.numChannels;
+    if(useParams)
+    {
+        std::visit([&](auto& s) {
+            s.updateCoefficients(spec.sampleRate,params->fc->get(),params->Q->get(),params->gainInDB->get(),a,b);
+        },strategy);
+    }else
+    {
+        std::visit([&](auto& s) {
+            s.updateCoefficients(spec.sampleRate,fc.value(),Q.value(),gainInDB.value(),a,b);
+        },strategy);
+    }
     x.resize(numChannels);
     y.resize(numChannels);
+    curr.resize(numChannels);
     for(auto i=0; i<numChannels; i++)
     {
         std::visit([&](auto& s){
@@ -58,19 +70,19 @@ void Filter::prepareToPlay(juce::dsp::ProcessSpec spec)
 
 void Filter::update()
 {
-    params.fcSmoother.setTargetValue(params.fc->get());
-    params.QSmoother.setTargetValue(params.Q->get());
-    params.gainInDBSmoother.setTargetValue(params.gainInDB->get());
-    bypass = params.bypass->get();
+    params->fcSmoother.setTargetValue(params->fc->get());
+    params->QSmoother.setTargetValue(params->Q->get());
+    params->gainInDBSmoother.setTargetValue(params->gainInDB->get());
+    bypass = params->bypass->get();
 }
 
 void Filter::smoothen()
 {
-    if(params.fcSmoother.isSmoothing() || params.QSmoother.isSmoothing() || params.gainInDBSmoother.isSmoothing())
+    if(params->fcSmoother.isSmoothing() || params->QSmoother.isSmoothing() || params->gainInDBSmoother.isSmoothing())
     {
-        float fc = params.fcSmoother.getNextValue();
-        float Q = params.QSmoother.getNextValue();
-        float gainInDB = params.gainInDBSmoother.getNextValue();
+        float fc = params->fcSmoother.getNextValue();
+        float Q = params->QSmoother.getNextValue();
+        float gainInDB = params->gainInDBSmoother.getNextValue();
         std::visit([&](auto& s) {
             s.updateCoefficients(spec.sampleRate,fc,Q,gainInDB,a,b);
         },strategy);
@@ -80,17 +92,19 @@ void Filter::smoothen()
 void Filter::putSample(float sample,int channel){
       std::vector<float>& xChannel = x[channel];
       std::vector<float>& yChannel = y[channel];
-      curr = (curr + 1) % xChannel.size();
-      xChannel[curr] = sample;
+      size_t c = curr[channel];
+      c = (c + 1) % xChannel.size();
+      xChannel[c] = sample;
       float processedSample = 0;
       for(int i=0; i<b.size();i++){
-          processedSample += b[i] * xChannel[(curr-i+xChannel.size()) % xChannel.size()];
+          processedSample += b[i] * xChannel[(c-i+xChannel.size()) % xChannel.size()];
       }
       for(int i=1; i<a.size();i++){
-          processedSample -= a[i] * yChannel[(curr-i+yChannel.size()) % yChannel.size()];
+          processedSample -= a[i] * yChannel[(c-i+yChannel.size()) % yChannel.size()];
       }
       processedSample /= a[0];
-      yChannel[curr] = processedSample;
+      yChannel[c] = processedSample;
+      curr[channel] = c;
   }
 
 
@@ -100,6 +114,7 @@ void Filter::processBlock(juce::dsp::AudioBlock<float> input, juce::dsp::AudioBl
     jassert(input.getNumSamples() == output.getNumSamples());
     
     if(useParams) update();
+    if(bypass) return;
     
     for(auto channel=0; channel<output.getNumChannels(); channel++)
     {
@@ -118,6 +133,7 @@ void Filter::processBlock(juce::dsp::AudioBlock<float> input, juce::dsp::AudioBl
 void Filter::processBlock(juce::dsp::AudioBlock<float> buf)
 {
     if(useParams) update();
+    if(bypass) return;
     
     for(auto channel=0; channel<buf.getNumChannels();channel++)
     {
@@ -142,5 +158,9 @@ void Filter::resetDelayLines(){
         for(int i=0; i<vec.size(); i++){
             vec[i] = 0;
         }
+    }
+    for(auto i=0; i<curr.size(); i++)
+    {
+        curr[i] = 0;
     }
 }

@@ -158,8 +158,6 @@ bool SaturEQAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 
 void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[maybe_unused]] juce::MidiBuffer& midiMessages)
 {
-
-    
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -179,9 +177,9 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     
     saturationManager.processBands(bandblocks);
     
-    saturationManager.sumSignal(upsampled);
+    saturationManager.sumSignals(upsampled);
     
-    //eqManager.processBlock(upsampled);
+    eqManager.processBlock(upsampled);
     
     oversampler.processSamplesDown(bufferblock);
     

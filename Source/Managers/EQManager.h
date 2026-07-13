@@ -19,7 +19,7 @@
 class EQManager {
     
 public:
-    EQManager(Parameters::EQ eqParams) : eqParams(eqParams) {};
+    EQManager(Parameters::EQ& eqParams) : eqParams(eqParams) {};
     
     void update();
     
@@ -38,7 +38,7 @@ private:
     size_t sampleRate;
     size_t numChannels;
     
-    Parameters::EQ eqParams;
+    Parameters::EQ& eqParams;
 
     std::vector<Filter> filters;
     

@@ -23,7 +23,7 @@ public:
     
     const std::vector<juce::dsp::AudioBlock<float>>& splitSignal(juce::dsp::AudioBlock<float> &input);
     
-    void sumSignal(juce::dsp::AudioBlock<float>& output);
+    void sumSignals(juce::dsp::AudioBlock<float>& output);
     
     void prepareToPlay(juce::dsp::ProcessSpec spec);
     

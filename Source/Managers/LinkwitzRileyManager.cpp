@@ -23,8 +23,8 @@ LinkwitzRileyManager::LinkwitzRileyManager(Parameters::Saturation& params)
         //Initialize with placeholder values, will be updated on prepareToPlay
         LowPass lp;
         HighPass hp;
-        Filter lpf{0,0,0,lp};
-        Filter hpf{0,0,0,hp};
+        Filter lpf{800,1,0,lp};
+        Filter hpf{800,1,0,hp};
         std::pair<Filter,Filter> pair{lpf,hpf};
         filters.emplace_back(pair);
     }
@@ -55,13 +55,15 @@ void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 
 
 
-void LinkwitzRileyManager::sumSignal(juce::dsp::AudioBlock<float>& output)
+void LinkwitzRileyManager::sumSignals(juce::dsp::AudioBlock<float>& output)
 {
     for(auto i=1; i<params.getNumSplits()+1; i++)
     {
         juce::dsp::AudioBlock<float> block = bands.getBlock(i);
         bands.getBlock(0).add(block);
     }
+    
+    jassert(bands.getBlock(0).getNumSamples() == output.getNumSamples());
     
     output.copyFrom(bands.getBlock(0).getSubBlock(0,output.getNumSamples()));
 }
@@ -85,6 +87,8 @@ const std::vector<juce::dsp::AudioBlock<float>>& LinkwitzRileyManager::splitSign
         filters[i].second.processBlock(input, block);
         filters[i+1].first.processBlock(block);
     }
+    
+    jassert(bands.getBlock(n).getNumSamples() == input.getNumSamples());
     
     filters[n-1].second.processBlock(input, bands.getBlock(n).getSubBlock(0, input.getNumSamples()));
     

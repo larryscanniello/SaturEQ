@@ -60,10 +60,6 @@ public:
             juce::LinearSmoothedValue<float> preGainSmoother;
         };
         
-        
-        
-    
-        
         Band& getParamsForBand(size_t bandNum)
         {
             return params[bandNum];
@@ -83,10 +79,12 @@ public:
         {
             return params.size();
         }
+        
         size_t getFreqToSplitAt(size_t splitNum)
         {
             return freqsToSplitAt[splitNum]->get();
         }
+        
         size_t getNumSplits()
         {
             return numSplits->get();
