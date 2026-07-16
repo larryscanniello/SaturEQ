@@ -8,12 +8,11 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Filter.h"
-#include "LinkwitzRileyManager.h"
-#include "Saturator.h"
-#include "ParamDeclarations.h"
-#include "Peaking.h"
-#include "Parameters.h"
+#include "DSP/Filters/Filter.h"
+#include "DSP/Saturator.h"
+#include "Parameters/ParamDeclarations.h"
+#include "DSP/Filters/Peaking.h"
+#include "Parameters/Parameters.h"
 #include <cmath>
 
 //==============================================================================
@@ -27,7 +26,7 @@ SaturEQAudioProcessor::SaturEQAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-        params(apvts,spec), lrManager(params.saturationParams,spec)
+        params(apvts), saturationManager(params.saturationParams), eqManager(params.eqParams)
 #endif
 {
 
@@ -104,12 +103,21 @@ void SaturEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    params.prepareToPlay(sampleRate);
+    
+    downsampledSpec.sampleRate = sampleRate;
+    downsampledSpec.maximumBlockSize = samplesPerBlock;
+    downsampledSpec.numChannels = static_cast<uint32_t>(getTotalNumInputChannels());
+    
+    size_t multiplicativeFactor = std::pow(2,OVERSAMPLING_FACTOR);
+    upsampledSpec.sampleRate = sampleRate * multiplicativeFactor;
+    upsampledSpec.maximumBlockSize = samplesPerBlock * (juce::uint32) multiplicativeFactor;
+    upsampledSpec.numChannels = downsampledSpec.numChannels;
+    
+    params.prepareToPlay(upsampledSpec);
     params.reset();
     
-    spec.sampleRate = sampleRate;
-    spec.maximumBlockSize = samplesPerBlock;
-    spec.numChannels = static_cast<size_t>(getTotalNumInputChannels());
+    eqManager.prepareToPlay(upsampledSpec);
+    saturationManager.prepareToPlay(upsampledSpec);
     
     oversampler.initProcessing(samplesPerBlock);
     
@@ -159,20 +167,19 @@ void SaturEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, [[ma
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    upsampled = oversampler.processSamplesUp(buffer);
+    juce::dsp::AudioBlock<float> bufferblock = juce::dsp::AudioBlock<float>(buffer);
     
-    bandblocks = lrManager->splitSignal(upsampled);
+    upsampled = oversampler.processSamplesUp(bufferblock);
+    
+    saturationManager.update();
+    
+    bandblocks = saturationManager.splitSignal(upsampled);
     
     saturationManager.processBands(bandblocks);
     
-    juce::dsp::AudioBlock<float> summed = lrManager -> sumSignal(upsampled);
+    saturationManager.sumSignals(upsampled);
     
-    for(auto &filter : filters)
-    {
-        filter.processBlock(summed);
-    }
-    
-    juce::dsp::AudioBlock<float> bufferblock = juce::dsp::AudioBlock<float>(buffer);
+    eqManager.processBlock(upsampled);
     
     oversampler.processSamplesDown(bufferblock);
     

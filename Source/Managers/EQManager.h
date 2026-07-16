@@ -9,34 +9,36 @@
 */
 
 #pragma once
-#include "Parameters.h"
-#include "ParamDeclarations.h"
-#include "Filter.h"
-#include "HighPass.h"
-#include "LowPass.h"
-#include "Peaking.h"
+#include "../Parameters/Parameters.h"
+#include "../Parameters/ParamDeclarations.h"
+#include "../DSP/Filters/Filter.h"
+#include "../DSP/Filters/HighPass.h"
+#include "../DSP/Filters/LowPass.h"
+#include "../DSP/Filters/Peaking.h"
 
 class EQManager {
     
 public:
-    EQManager(size_t sr, size_t numBands, size_t numChannels, Parameters::EQParams eqparams)
-    : sampleRate(sr), numChannels(numChannels), eqParams(eqparams)
-    {
-        initializeFilterCoefficients(sr, numBands, numChannels, eqparams);
-    };
+    EQManager(Parameters::EQ& eqParams) : eqParams(eqParams) {};
+    
+    void update();
     
     void processBlock(juce::dsp::AudioBlock<float>& buffer);
     
-    void initializeFilterCoefficients(size_t sr, size_t numBands, size_t numChannels, Parameters::EQParams eqparams);
+    void updateFilters(size_t numBands, juce::dsp::ProcessSpec spec);
+    
+    void prepareToPlay(juce::dsp::ProcessSpec spec);
     
 private:
+    
+    juce::dsp::ProcessSpec spec;
     
     void changeNumBands(size_t numBands);
     
     size_t sampleRate;
     size_t numChannels;
     
-    Parameters::EQParams eqParams;
+    Parameters::EQ& eqParams;
 
     std::vector<Filter> filters;
     

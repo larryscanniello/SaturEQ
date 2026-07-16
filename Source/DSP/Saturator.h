@@ -11,23 +11,25 @@
 #pragma once
 #include <JuceHeader.h>
 #include <juce_dsp/juce_dsp.h>
-#include "Parameters.h"
+#include "../Parameters/Parameters.h"
 
 class Saturator {
 
 public:
-    Saturator(Parameters::Saturation::Band params) : params(params) {}
+    Saturator(Parameters::Saturation::Band& params, juce::dsp::ProcessSpec spec) : params(params) {}
     
     void processBlock(juce::dsp::AudioBlock<float>& input);
-    
-    bool bypass;
-    
-    float preGain;
     
     void update();
     
     void smoothen();
     
+    juce::dsp::ProcessSpec spec;
+    
 private:
-    Parameters::Saturation::Band params;
+    Parameters::Saturation::Band& params;
+    
+    float preGain;
+    
+    bool bypass;
 };
