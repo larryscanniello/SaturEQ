@@ -105,7 +105,7 @@ void RotaryKnobLookAndFeel::drawRotarySlider(
 
 juce::Font RotaryKnobLookAndFeel::getLabelFont([[maybe_unused]] juce::Label& label)
 {
-    return Fonts::getFont();
+    return Fonts::getFont(12);
 }
 
 class RotaryKnobLabel : public juce::Label

@@ -36,16 +36,20 @@ private:
     juce::OwnedArray<RotaryKnob> eqGains;
     juce::OwnedArray<RotaryKnob> eqQs;
     juce::OwnedArray<RotaryKnob> eqFreqs;
-    juce::OwnedArray<juce::ImageButton> eqBypass;
+    juce::OwnedArray<juce::ImageButton> eqBypasses;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> eqBypassAttachments;
     juce::OwnedArray<juce::Label> eqBypassLabels;
-
-    juce::OwnedArray<RotaryKnob> saturationPreGains;
-    juce::OwnedArray<juce::ImageButton> saturationBypass;
-    juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> saturationBypassAttachments;
-    juce::OwnedArray<juce::Label> saturationBypassLabels;
-    
     juce::GroupComponent eqGroup;
+    juce::OwnedArray<juce::Component> eqBands;
+    
+    juce::OwnedArray<RotaryKnob> startFrequencies;
+    juce::OwnedArray<RotaryKnob> saturationPreGains;
+    juce::OwnedArray<juce::ImageButton> saturationBypasses;
+    juce::OwnedArray<juce::Label> saturationBypassLabels;
+    juce::GroupComponent saturationGroup;
+    juce::OwnedArray<juce::Component> saturationBands;
+    
+    juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> saturationBypassAttachments;
     
     MainLookAndFeel mainLF;
 
