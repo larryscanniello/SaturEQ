@@ -25,8 +25,10 @@ LinkwitzRileyManager::LinkwitzRileyManager(Parameters::Saturation& params)
         HighPass hp;
         Filter lpf{800,1,0,lp};
         Filter hpf{800,1,0,hp};
-        std::pair<Filter,Filter> pair{lpf,hpf};
-        filters.emplace_back(pair);
+        std::pair<Filter,Filter> pair1{lpf,lpf};
+        std::pair<Filter,Filter> pair2{hpf,hpf};
+        std::pair<std::pair<Filter,Filter>,std::pair<Filter,Filter>> pairOfPairs{pair1,pair2};
+        filters.emplace_back(pairOfPairs);
     }
     deriveFiltersFromFrequencies();
 }
@@ -36,9 +38,11 @@ void LinkwitzRileyManager::deriveFiltersFromFrequencies()
 {
     for(int i=0; i<params.getNumSplits(); i++){
         float fc = params.getFreqToSplitAt(i);
-        std::pair<Filter,Filter>& pair = filters[i];
-        pair.first.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
-        pair.second.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
+        std::pair<std::pair<Filter,Filter>,std::pair<Filter,Filter>>& highAndLowPass = filters[i];
+        highAndLowPass.first.first.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
+        highAndLowPass.first.second.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
+        highAndLowPass.second.first.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
+        highAndLowPass.second.second.updateCoefficients(fc,juce::MathConstants<float>::sqrt2 * 0.5f,0.0f);
     }
 }
 
@@ -46,8 +50,10 @@ void LinkwitzRileyManager::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     for(auto& pair : filters)
     {
-        pair.first.prepareToPlay(spec);
-        pair.second.prepareToPlay(spec);
+        pair.first.first.prepareToPlay(spec);
+        pair.first.second.prepareToPlay(spec);
+        pair.second.first.prepareToPlay(spec);
+        pair.second.second.prepareToPlay(spec);
     }
     deriveFiltersFromFrequencies();
     bands.prepareToPlay(spec);
@@ -80,17 +86,21 @@ const std::vector<juce::dsp::AudioBlock<float>>& LinkwitzRileyManager::splitSign
         return bands.getBlocks();
     };
 
-    filters[0].first.processBlock(input, bands.getBlock(0).getSubBlock(0, input.getNumSamples()));
+    filters[0].first.first.processBlock(input, bands.getBlock(0).getSubBlock(0, input.getNumSamples()));
+    filters[0].first.second.processBlock(input, bands.getBlock(0).getSubBlock(0, input.getNumSamples()));
     
     for(int i=0; i<n-1;i++){
         juce::dsp::AudioBlock<float> block{bands.getBlock(i+1).getSubBlock(0, input.getNumSamples())};
-        filters[i].second.processBlock(input, block);
-        filters[i+1].first.processBlock(block);
+        filters[i].second.first.processBlock(input, block);
+        filters[i].second.second.processBlock(input, block);
+        filters[i+1].first.first.processBlock(block);
+        filters[i+1].first.second.processBlock(block);
     }
     
     jassert(bands.getBlock(n).getNumSamples() == input.getNumSamples());
     
-    filters[n-1].second.processBlock(input, bands.getBlock(n).getSubBlock(0, input.getNumSamples()));
+    filters[n-1].second.first.processBlock(input, bands.getBlock(n).getSubBlock(0, input.getNumSamples()));
+    filters[n-1].second.second.processBlock(input, bands.getBlock(n).getSubBlock(0, input.getNumSamples()));
     
     return bands.getBlocks();
 }
