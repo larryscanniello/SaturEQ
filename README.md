@@ -21,8 +21,6 @@ All-in-one multiband saturator and EQ made with C++/JUCE.
                    ▼
       Linkwitz–Riley Crossover (adjustable number of bands)
           ┌────┼────┐
-          ▼    ▼    ▼
-        Low   Mid  High
           │    │    │
           ▼    ▼    ▼
       Saturation (per band)
