@@ -2,6 +2,9 @@
 
 All-in-one multiband saturator and EQ made with C++/JUCE.
 
+<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/7b428fcf-3ccb-4baa-ab7f-e2a2758c000b" />
+
+
 ## Features
 
 - Multiple band EQ supporting low pass, high pass, and peaking filters (courtesy of the Robert Bristow-Johnson Audio EQ cookbook)
