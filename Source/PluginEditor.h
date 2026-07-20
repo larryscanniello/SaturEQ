@@ -36,7 +36,7 @@ private:
     juce::OwnedArray<RotaryKnob> eqGains;
     juce::OwnedArray<RotaryKnob> eqQs;
     juce::OwnedArray<RotaryKnob> eqFreqs;
-    juce::OwnedArray<juce::ImageButton> eqBypasses;
+    juce::OwnedArray<juce::TextButton> eqBypasses;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> eqBypassAttachments;
     juce::OwnedArray<juce::Label> eqBypassLabels;
     juce::GroupComponent eqGroup;
@@ -44,7 +44,7 @@ private:
     
     juce::OwnedArray<RotaryKnob> startFrequencies;
     juce::OwnedArray<RotaryKnob> saturationPreGains;
-    juce::OwnedArray<juce::ImageButton> saturationBypasses;
+    juce::OwnedArray<juce::TextButton> saturationBypasses;
     juce::OwnedArray<juce::Label> saturationBypassLabels;
     juce::GroupComponent saturationGroup;
     juce::OwnedArray<juce::Component> saturationBands;

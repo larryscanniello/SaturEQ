@@ -45,6 +45,7 @@ namespace Colors
         const juce::Colour background { 245, 240, 235 };
         const juce::Colour backgroundToggled { 255, 250, 245 };
         const juce::Colour outline { 235, 230, 225 };
+        const juce::Colour powerOn { 230, 150, 90 };
     }
 
     namespace LevelMeter

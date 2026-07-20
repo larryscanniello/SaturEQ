@@ -170,7 +170,7 @@ juce::Font MainLookAndFeel::getLabelFont([[maybe_unused]] juce::Label& label)
 ButtonLookAndFeel::ButtonLookAndFeel()
 {
     setColour(juce::TextButton::textColourOffId, Colors::Button::text);
-    setColour(juce::TextButton::textColourOnId, Colors::Button::textToggled);
+    setColour(juce::TextButton::textColourOnId, Colors::Button::powerOn);
     setColour(juce::TextButton::buttonColourId, Colors::Button::background);
     setColour(juce::TextButton::buttonOnColourId, Colors::Button::backgroundToggled);
 }
@@ -210,7 +210,7 @@ void ButtonLookAndFeel::drawButtonText(
         buttonRect.translate(0.0f, 1.0f);
     }
 
-    if (button.getToggleState()) {
+    if (!button.getToggleState()) {
         g.setColour(button.findColour(juce::TextButton::textColourOnId));
     } else {
         g.setColour(button.findColour(juce::TextButton::textColourOffId));
