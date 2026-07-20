@@ -52,7 +52,7 @@ SaturEQAudioProcessorEditor::SaturEQAudioProcessorEditor (SaturEQAudioProcessor&
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS+1; i++)
     {
         std::string suffix = std::to_string(i);
-        saturationPreGains.add(std::make_unique<RotaryKnob>("PreGain",audioProcessor.apvts,std::string(ParamDeclarations::SaturationPreGain::ID) + suffix));
+        saturationPreGains.add(std::make_unique<RotaryKnob>("Gain",audioProcessor.apvts,std::string(ParamDeclarations::SaturationPreGain::ID) + suffix));
         if(i<ParamDeclarations::SATURATION_MAX_SPLITS)
            startFrequencies.add(std::make_unique<RotaryKnob>("Split Freq",audioProcessor.apvts,std::string(ParamDeclarations::SaturationSplitFreq::ID)+suffix));
         auto* saturationBypassButton = saturationBypasses.add(std::make_unique<juce::TextButton>(powerSymbol, "Bypass"));
