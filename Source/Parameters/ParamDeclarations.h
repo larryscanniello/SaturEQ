@@ -297,7 +297,7 @@ class EQFreq3 : public FloatParameters<EQFreq3> {
     public:
         static constexpr auto ID = "freq3";
         static constexpr auto Name = "Freq3";
-        inline static const auto Range = getLogMidRange(20.f, 1040.f, 75.0f, 0.1f);
+        inline static const auto Range = getLogMidRange(20.f, 20000.f, 1040.0f, 0.1f);
         static constexpr auto DefaultV = 1040.0f;
     };
 
@@ -305,7 +305,7 @@ class EQFreq4 : public FloatParameters<EQFreq4> {
     public:
         static constexpr auto ID = "freq4";
         static constexpr auto Name = "Freq4";
-        inline static const auto Range = getLogMidRange(20.f, 2500.f, 1000.f, 0.1f);
+        inline static const auto Range = getLogMidRange(20.f, 20000.f, 2500.f, 0.1f);
         static constexpr auto DefaultV = 2500.f;
     };
 

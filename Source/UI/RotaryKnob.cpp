@@ -18,8 +18,8 @@ RotaryKnob::RotaryKnob(const juce::String& text,
     : attachment(apvts, parameterID.getParamID(), slider)
 {
     slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
-    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 16);
-    slider.setBounds(0, 0, 70, 86);
+    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 16);
+    slider.setBounds(0, 0, 40, 56); //OG 0, 0, 70, 86
     addAndMakeVisible(slider);
 
     label.setText(text, juce::NotificationType::dontSendNotification);
@@ -28,7 +28,7 @@ RotaryKnob::RotaryKnob(const juce::String& text,
     label.attachToComponent(&slider, false);
     addAndMakeVisible(label);
 
-    setSize(70, 110);
+    setSize(40,76); //OG 70,110
 
     setLookAndFeel(RotaryKnobLookAndFeel::get());
 
@@ -44,5 +44,5 @@ RotaryKnob::~RotaryKnob()
 
 void RotaryKnob::resized()
 {
-    slider.setTopLeftPosition(0, 24);
+    slider.setTopLeftPosition(0, 20);
 }

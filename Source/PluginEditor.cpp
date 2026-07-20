@@ -14,18 +14,21 @@
 
 constexpr size_t SCREEN_WIDTH =  800; //og 400
 constexpr size_t SCREEN_HEIGHT = 600; //og 300;
+constexpr size_t ROW_GAP = 12;
+
+static const juce::String powerSymbol = juce::String::fromUTF8("\xE2\x8F\xBB");
 
 SaturEQAudioProcessorEditor::SaturEQAudioProcessorEditor (SaturEQAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    eqFreqs.add(std::make_unique<RotaryKnob>("Frequency",audioProcessor.apvts,ParamDeclarations::EQFreq0::ID));
-    eqFreqs.add(std::make_unique<RotaryKnob>("Frequency",audioProcessor.apvts,ParamDeclarations::EQFreq1::ID));
-    eqFreqs.add(std::make_unique<RotaryKnob>("Frequency",audioProcessor.apvts,ParamDeclarations::EQFreq2::ID));
-    eqFreqs.add(std::make_unique<RotaryKnob>("Frequency",audioProcessor.apvts,ParamDeclarations::EQFreq3::ID));
-    eqFreqs.add(std::make_unique<RotaryKnob>("Frequency",audioProcessor.apvts,ParamDeclarations::EQFreq4::ID));
-    eqFreqs.add(std::make_unique<RotaryKnob>("Frequency",audioProcessor.apvts,ParamDeclarations::EQFreq5::ID));
+    eqFreqs.add(std::make_unique<RotaryKnob>("Freq",audioProcessor.apvts,ParamDeclarations::EQFreq0::ID));
+    eqFreqs.add(std::make_unique<RotaryKnob>("Freq",audioProcessor.apvts,ParamDeclarations::EQFreq1::ID));
+    eqFreqs.add(std::make_unique<RotaryKnob>("Freq",audioProcessor.apvts,ParamDeclarations::EQFreq2::ID));
+    eqFreqs.add(std::make_unique<RotaryKnob>("Freq",audioProcessor.apvts,ParamDeclarations::EQFreq3::ID));
+    eqFreqs.add(std::make_unique<RotaryKnob>("Freq",audioProcessor.apvts,ParamDeclarations::EQFreq4::ID));
+    eqFreqs.add(std::make_unique<RotaryKnob>("Freq",audioProcessor.apvts,ParamDeclarations::EQFreq5::ID));
 
     eqQs.add(std::make_unique<RotaryKnob>("Q",audioProcessor.apvts,ParamDeclarations::EQQ0::ID));
     eqQs.add(std::make_unique<RotaryKnob>("Q",audioProcessor.apvts,ParamDeclarations::EQQ1::ID));
@@ -38,7 +41,10 @@ SaturEQAudioProcessorEditor::SaturEQAudioProcessorEditor (SaturEQAudioProcessor&
     {
         std::string suffix = std::to_string(i);
         eqGains.add(std::make_unique<RotaryKnob>("Gain",audioProcessor.apvts,std::string(ParamDeclarations::EQGain::ID)+suffix));
-        auto* eqBypassButton = eqBypass.add(std::make_unique<juce::ImageButton>("Bypass"));
+        auto* eqBypassButton = eqBypasses.add(std::make_unique<juce::TextButton>(powerSymbol, "Bypass"));
+        eqBypassButton->setClickingTogglesState(true);
+        eqBypassButton->setSize(40, 20);
+        eqBypassButton->setLookAndFeel(ButtonLookAndFeel::get());
         eqBypassAttachments.add(std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             audioProcessor.apvts, std::string(ParamDeclarations::EQBypass::ID)+suffix, *eqBypassButton));
     }
@@ -46,18 +52,56 @@ SaturEQAudioProcessorEditor::SaturEQAudioProcessorEditor (SaturEQAudioProcessor&
     for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS+1; i++)
     {
         std::string suffix = std::to_string(i);
-        saturationPreGains.add(std::make_unique<RotaryKnob>("PreGain",audioProcessor.apvts,std::string(ParamDeclarations::SaturationPreGain::ID) + suffix));
-        auto* saturationBypassButton = saturationBypass.add(std::make_unique<juce::ImageButton>("Bypass"));
+        saturationPreGains.add(std::make_unique<RotaryKnob>("Gain",audioProcessor.apvts,std::string(ParamDeclarations::SaturationPreGain::ID) + suffix));
+        if(i<ParamDeclarations::SATURATION_MAX_SPLITS)
+           startFrequencies.add(std::make_unique<RotaryKnob>("Split Freq",audioProcessor.apvts,std::string(ParamDeclarations::SaturationSplitFreq::ID)+suffix));
+        auto* saturationBypassButton = saturationBypasses.add(std::make_unique<juce::TextButton>(powerSymbol, "Bypass"));
+        saturationBypassButton->setClickingTogglesState(true);
+        saturationBypassButton->setSize(40, 20);
+        saturationBypassButton->setLookAndFeel(ButtonLookAndFeel::get());
         saturationBypassAttachments.add(std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             audioProcessor.apvts, std::string(ParamDeclarations::SaturationBypass::ID) + suffix, *saturationBypassButton));
     }
+
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS; i++)
+    {
+        auto* slider = &startFrequencies[i]->slider;
+        auto* leftSlider = (i > 0) ? &startFrequencies[i-1]->slider : nullptr;
+        auto* rightSlider = (i < ParamDeclarations::SATURATION_MAX_SPLITS-1) ? &startFrequencies[i+1]->slider : nullptr;
+        slider->onValueChange = [slider, leftSlider, rightSlider]
+        {
+            if(rightSlider != nullptr && slider->getValue() > rightSlider->getValue())
+                slider->setValue(rightSlider->getValue(), juce::sendNotificationSync);
+            else if(leftSlider != nullptr && slider->getValue() < leftSlider->getValue())
+                slider->setValue(leftSlider->getValue(), juce::sendNotificationSync);
+        };
+    }
+
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS+1; i++)
+    {
+        saturationBands.add(std::make_unique<juce::Component>());
+        saturationBands[i]->addAndMakeVisible(saturationPreGains[i]);
+        if(i>0) saturationBands[i]->addAndMakeVisible(startFrequencies[i-1]);
+        saturationBands[i]->addAndMakeVisible(saturationBypasses[i]);
+        saturationGroup.addAndMakeVisible(saturationBands[i]);
+    }
+    
+    saturationGroup.setText("Saturation");
+    saturationGroup.setTextLabelPosition(juce::Justification::horizontallyCentred);
+    addAndMakeVisible(saturationGroup);
     
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        eqGroup.addAndMakeVisible(eqFreqs[i]);
-        eqGroup.addAndMakeVisible(eqQs[i]);
-        eqGroup.addAndMakeVisible(eqGains[i]);
+        eqBands.add(std::make_unique<juce::Component>());
+        eqBands[i]->addAndMakeVisible(eqFreqs[i]);
+        eqBands[i]->addAndMakeVisible(eqQs[i]);
+        if(i>0 && i<ParamDeclarations::EQ_NUM_BANDS-1)
+            eqBands[i]->addAndMakeVisible(eqGains[i]);
+        eqBands[i]->addAndMakeVisible(eqBypasses[i]);
+        eqGroup.addAndMakeVisible(eqBands[i]);
     }
+    eqGroup.setText("EQ");
+    eqGroup.setTextLabelPosition(juce::Justification::horizontallyCentred);
     addAndMakeVisible(eqGroup);
     
     setSize (SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -79,15 +123,54 @@ void SaturEQAudioProcessorEditor::paint (juce::Graphics& g)
 
 void SaturEQAudioProcessorEditor::resized()
 {
-    eqGroup.setBounds(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
-    const size_t factor = SCREEN_WIDTH/(ParamDeclarations::EQ_NUM_BANDS+1);
+    const int H    = eqFreqs[0]->getHeight();
+    const int bypassH = eqBypasses[0]->getHeight();
+    const int PAD  = (int(SCREEN_HEIGHT) - 5*H - 2*bypassH - 5*int(ROW_GAP)) / 4;
+    const int eqH  = 2*PAD + 3*H + bypassH + 3*int(ROW_GAP);
+    const int satH = 2*PAD + 2*H + bypassH + 2*int(ROW_GAP);
+
+    eqGroup.setBounds(0,0,SCREEN_WIDTH,eqH);
+    const size_t factor = SCREEN_WIDTH/ParamDeclarations::EQ_NUM_BANDS;
 
     for(auto i=0; i<ParamDeclarations::EQ_NUM_BANDS; i++)
     {
-        
-        eqFreqs[i]->setCentrePosition(SCREEN_WIDTH - factor*(i+1),SCREEN_HEIGHT/4);
-        eqQs[i]->setCentrePosition(SCREEN_WIDTH - factor*(i+1), SCREEN_HEIGHT/2);
-        eqGains[i]->setCentrePosition(SCREEN_WIDTH - factor*(i+1), 3*SCREEN_HEIGHT/4);
+        eqBands[i]->setBounds(factor*i, 0, factor, eqH);
+        int groupWidth = eqBands[i]->getWidth();
+
+        auto area = eqBands[i]->getLocalBounds();
+        area.removeFromTop(PAD);
+        auto r0 = area.removeFromTop(eqFreqs[i]->getHeight());
+        eqFreqs[i]->setCentrePosition(groupWidth/2, r0.getCentreY());
+        area.removeFromTop(ROW_GAP);
+        auto r1 = area.removeFromTop(eqQs[i]->getHeight());
+        eqQs[i]->setCentrePosition(groupWidth/2, r1.getCentreY());
+        area.removeFromTop(ROW_GAP);
+        auto r2 = area.removeFromTop(eqGains[i]->getHeight());
+        eqGains[i]->setCentrePosition(groupWidth/2, r2.getCentreY());
+        area.removeFromTop(ROW_GAP);
+        auto r3 = area.removeFromTop(eqBypasses[i]->getHeight());
+        eqBypasses[i]->setCentrePosition(groupWidth/2, r3.getCentreY());
     }
+
+    saturationGroup.setBounds(0,eqH,SCREEN_WIDTH,satH);
+    const size_t satFactor = SCREEN_WIDTH/(ParamDeclarations::SATURATION_MAX_SPLITS+1);
+
+    for(auto i=0; i<ParamDeclarations::SATURATION_MAX_SPLITS+1; i++)
+    {
+        saturationBands[i]->setBounds(satFactor*i,0, satFactor, satH);
+        int groupWidth = saturationBands[i]->getWidth();
+
+        auto area = saturationBands[i]->getLocalBounds();
+        area.removeFromTop(PAD);
+        auto r0 = area.removeFromTop(saturationPreGains[i]->getHeight()); // start-freq row
+        if(i>0) startFrequencies[i-1]->setCentrePosition(groupWidth/2, r0.getCentreY());
+        area.removeFromTop(ROW_GAP);
+        auto r1 = area.removeFromTop(saturationPreGains[i]->getHeight());
+        saturationPreGains[i]->setCentrePosition(groupWidth/2, r1.getCentreY());
+        area.removeFromTop(ROW_GAP);
+        auto r2 = area.removeFromTop(saturationBypasses[i]->getHeight());
+        saturationBypasses[i]->setCentrePosition(groupWidth/2, r2.getCentreY());
+    }
+    
     
 }

@@ -37,7 +37,7 @@ private:
     
     Parameters::Saturation& params;
     
-    std::vector<std::pair<Filter,Filter>> filters;
+    std::vector<std::pair<std::pair<Filter,Filter>,std::pair<Filter,Filter>>> filters;
     
     /*
         This struct holds the buffers for the split audio in memory
