@@ -47,7 +47,7 @@ All-in-one multiband saturator and EQ made with C++/JUCE.
 
 ## Future Improvements
 
-Right now, the DSP is complete, and the plugin is functional audio-wise. The parameters are wired in with APVTS. The user interface is currently being built.
+The user interface is simple. A more advanced user interface might be built in the future. The saturators may also be upgraded later.
 
 ## Acknowledgements
 
